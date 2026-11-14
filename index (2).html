@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referee Card Reports</title>
+<meta name="description" content="Submit yellow, red and blue card reports and produce a signed, tamper-evident report suitable for disciplinary procedures.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='9' y='4' width='14' height='24' rx='2' fill='%23d62828'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f6f6f3; --surface:#fff; --ink:#17181a; --muted:#5d6168; --line:#dcdcd5; --accent:#16355f;
+  --yellow:#f4c20d; --red:#d62828; --blue:#1f6fd1; --ok:#1c7c45; --warn:#a15c00; --bad:#b3261e;
+  --yellow-bg:#fff6cc; --red-bg:#fde8e8; --blue-bg:#e3eefc; --grey-bg:#ececE6;
+  --radius:10px; --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#101214; --surface:#191c1f; --ink:#ecedee; --muted:#a2a7ad; --line:#2f3438; --accent:#8db4ee;
+    --yellow-bg:#3a3205; --red-bg:#3b1515; --blue-bg:#14253d; --grey-bg:#23272a; --ok:#58c383; --warn:#e0a13c; --bad:#ff8a80;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--font)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+.topbar{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--ink);text-decoration:none}
+.cardmark{width:14px;height:22px;border-radius:2px;background:var(--red);box-shadow:-7px 3px 0 var(--yellow),7px 3px 0 var(--blue);margin:0 8px}
+nav{display:flex;gap:14px;align-items:center}
+nav a{color:var(--ink);text-decoration:none;font-weight:600}
+nav a[data-nav].on{color:var(--accent);text-decoration:underline;text-underline-offset:6px}
+h1{font-size:1.6rem;margin:24px 0 4px}
+h2{font-size:1.15rem;margin:0 0 4px}
+h3{font-size:1rem;margin:18px 0 6px}
+.sub{color:var(--muted);margin:0 0 16px}
+.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block;min-height:40px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.primary{color:#0d1b2e}}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{padding:6px 12px;min-height:34px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:16px 0}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;border-left:6px solid var(--line)}
+.tile b{display:block;font-size:1.9rem;line-height:1.1}
+.tile span{color:var(--muted);font-size:.9rem}
+.tile.y{border-left-color:var(--yellow)}.tile.r{border-left-color:var(--red)}.tile.b{border-left-color:var(--blue)}.tile.a{border-left-color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:16px}
+.bars{display:grid;gap:6px;margin-top:8px}
+.bar-row{display:grid;grid-template-columns:minmax(80px,38%) 1fr 28px;gap:8px;align-items:center;font-size:.92rem}
+.bar-row .track{background:var(--grey-bg);border-radius:4px;height:14px;overflow:hidden}
+.bar-row .fill{height:100%;background:var(--accent);border-radius:4px}
+.bar-row .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
+.filters input,.filters select{min-width:150px}
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr.clickable{cursor:pointer}tr.clickable:hover{background:var(--grey-bg)}
+.tablewrap{overflow-x:auto}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:700;white-space:nowrap}
+.pill.yellow{background:var(--yellow-bg);color:#6b5400;border:1px solid var(--yellow)}
+.pill.red{background:var(--red-bg);color:var(--bad);border:1px solid var(--red)}
+.pill.blue{background:var(--blue-bg);color:#1457a8;border:1px solid var(--blue)}
+.pill.abandoned{background:var(--grey-bg);border:1px solid var(--line)}
+.pill.draft{background:var(--grey-bg);color:var(--muted);border:1px dashed var(--muted)}
+.pill.final{background:#e0f3e8;color:var(--ok);border:1px solid var(--ok)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.yellow{color:var(--yellow)} :root:not([data-theme="light"]) .pill.blue{color:#8db4ee} :root:not([data-theme="light"]) .pill.final{background:#12301f}}
+.empty{text-align:center;padding:36px 12px;color:var(--muted)}
+/* form */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}.side{position:static!important}}
+.side{position:sticky;top:72px}
+.cardpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px}
+.cardpick label{cursor:pointer;position:relative;min-width:0}
+.cardpick input{position:absolute;opacity:0}
+.cp{border:2px solid var(--line);border-radius:var(--radius);padding:12px;background:var(--surface);display:flex;gap:12px;align-items:center;min-height:76px}
+.cp i{width:26px;height:38px;border-radius:3px;flex:none;border:1px solid rgba(0,0,0,.25)}
+.cp b{display:block}.cp small{color:var(--muted);display:block;line-height:1.25}
+.cpy i{background:var(--yellow)}.cpr i{background:var(--red)}.cpb i{background:var(--blue)}.cpa i{background:repeating-linear-gradient(45deg,#888,#888 4px,#bbb 4px,#bbb 8px)}
+.cardpick input:checked+.cp{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.cardpick input:focus-visible+.cp{outline:3px solid var(--blue);outline-offset:2px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+@media (max-width:640px){.fields{grid-template-columns:1fr}}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f.full{grid-column:1/-1}
+.f>label,.f>.lab{font-weight:600;font-size:.93rem}
+.req{color:var(--bad)}
+.hint{color:var(--muted);font-size:.85rem}
+input[type=text],input[type=date],input[type=time],input[type=number],input[type=tel],input[type=email],input[type=search],select,textarea{font:inherit;color:inherit;background:var(--surface);border:1px solid #8a8f96;border-radius:8px;padding:9px 10px;width:100%;min-height:42px}
+textarea{min-height:110px;resize:vertical}
+.f.err input,.f.err select,.f.err textarea{border-color:var(--bad);border-width:2px}
+.errmsg{color:var(--bad);font-size:.85rem}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{display:inline-flex;align-items:center;gap:6px;border:1px solid #8a8f96;border-radius:999px;padding:6px 12px;cursor:pointer;background:var(--surface);font-size:.93rem;min-height:36px}
+.opt input{margin:0}
+.opt:has(input:checked){background:var(--accent);color:#fff;border-color:var(--accent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .opt:has(input:checked){color:#0d1b2e}}
+.laws{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--surface)}
+.laws h4{margin:10px 0 4px;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.lawrow{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer}
+.lawrow code{font-weight:700;min-width:48px}
+.lawrow input{margin-top:5px;flex:none}
+.chosen{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chosen .pill{background:var(--grey-bg);border:1px solid var(--line)}
+.sect{border-top:3px solid var(--accent)}
+.sect.cy{border-top-color:var(--yellow)}.sect.cr{border-top-color:var(--red)}.sect.cb{border-top-color:var(--blue)}
+.note{background:var(--blue-bg);border-radius:8px;padding:10px 12px;font-size:.9rem;margin:8px 0}
+.note.warn{background:var(--yellow-bg)}
+.meter{height:10px;background:var(--grey-bg);border-radius:6px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;background:var(--ok);transition:width .2s}
+.checks{list-style:none;margin:8px 0 0;padding:0;font-size:.9rem}
+.checks li{display:flex;gap:8px;padding:3px 0;cursor:pointer}
+.checks li .mk{flex:none;width:18px;text-align:center;font-weight:700}
+.checks li.ok{color:var(--muted)}.checks li.ok .mk{color:var(--ok)}
+.checks li.miss .mk{color:var(--bad)}.checks li.rec .mk{color:var(--warn)}
+.sigpad{border:1px dashed #8a8f96;border-radius:8px;background:#fff;touch-action:none;width:100%;height:150px;display:block}
+.saved{color:var(--muted);font-size:.85rem}
+/* report document */
+.doc{background:#fff;color:#111;border:1px solid var(--line);border-radius:6px;padding:28px 30px;font-size:14px;line-height:1.45;max-width:850px;margin:0 auto}
+.doc h1{font-size:1.25rem;margin:0}
+.doc h2{font-size:.95rem;text-transform:uppercase;letter-spacing:.05em;background:#eee;padding:4px 8px;margin:18px 0 6px;border-left:5px solid #16355f;color:#111}
+.doc.t-yellow h2{border-left-color:#f4c20d}.doc.t-red h2{border-left-color:#d62828}.doc.t-blue h2{border-left-color:#1f6fd1}
+.doc table{font-size:13px}.doc th{width:28%;background:#fafafa;color:#333;text-transform:none;letter-spacing:0;font-size:13px;border:1px solid #ccc;padding:5px 8px}
+.doc td{border:1px solid #ccc;padding:5px 8px}
+.doc .hd{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:3px solid #111;padding-bottom:10px}
+.doc .big{display:inline-block;width:34px;height:48px;border:1px solid #333;border-radius:3px;vertical-align:middle;margin-right:10px}
+.doc .narr{white-space:pre-wrap;border:1px solid #ccc;padding:8px 10px;min-height:60px}
+.doc .sig{max-height:90px;border-bottom:1px solid #333}
+.doc .hash{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;word-break:break-all}
+.doc .foot{font-size:11px;color:#444;margin-top:14px}
+.doc .draftmark{color:#b3261e;font-weight:700;border:2px solid #b3261e;padding:2px 8px;display:inline-block;transform:rotate(-3deg)}
+.doc .cols{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.noprint{}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:50;padding:16px}
+.modal>div{background:var(--surface);border-radius:12px;padding:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.foot{color:var(--muted);font-size:.82rem;padding:24px 16px}
+@media print{
+  body{background:#fff}
+  .topbar,.noprint,.foot,.modal{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .doc{border:0;padding:0;max-width:none;font-size:12px}
+  .doc h2,.doc th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc .big{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc section{break-inside:avoid}
+  @page{margin:14mm}
+}
+.filters input,.filters select{width:auto;flex:1 1 180px}
+
+.steps{display:flex;gap:6px;overflow-x:auto;margin:0 0 14px;padding-bottom:4px;scrollbar-width:thin}
+.step{font:inherit;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;white-space:nowrap;min-height:38px}
+.step .n{width:22px;height:22px;border-radius:50%;background:var(--grey-bg);display:grid;place-items:center;font-size:.8rem;font-weight:700}
+.step.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);font-weight:700}
+.step.on .n{background:var(--accent);color:#fff}
+.step em{font-style:normal;font-size:.75rem;font-weight:700;border-radius:999px;padding:0 7px}
+.step em.bad{background:var(--red-bg);color:var(--bad)}.step em.ok{color:var(--ok)}
+.stepnav{margin:4px 0 20px}
+.aitools{margin-top:8px;display:grid;gap:6px}
+.aitext{white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;margin:8px 0}
+.aitools ul{margin:6px 0 0;padding-left:20px}
+nav a.btn.primary.on{color:#fff;text-decoration:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) nav a.btn.primary.on{color:#0d1b2e}}
+
+.previewbox{border:1px solid var(--line);border-radius:8px;overflow-x:auto;background:#fff;padding:8px;margin-bottom:16px}
+.aibtns{margin:6px 0}
+.doc .narr b{display:block;margin-top:8px}
+.doc .narr b:first-child{margin-top:0}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap bar">
+    <a class="brand" href="#/dashboard"><span class="cardmark" aria-hidden="true"></span><span id="brandText">Referee Card Reports</span></a>
+    <nav>
+      <a href="#/dashboard" data-nav="dashboard">Dashboard</a>
+      <a href="#/new" class="btn primary small" data-nav="new">+ New card report</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap" id="app" tabindex="-1"></main>
+<footer class="wrap foot noprint"><span id="footNote"></span></footer>
+<script>
+// Edit these values for your union before publishing.
+window.APP_CONFIG = {
+  orgName: "WP",
+  orgFull: "Western Province Rugby Football Union – WP Club Rugby",
+  appTitle: "Referee Card Reports",
+  // Where finished reports should be emailed (the "Email to union" button). Leave "" to hide it.
+  disciplineEmail: "",
+  lawsEdition: "World Rugby Laws of the Game, Rugby Union 2026",
+  // AI writing help (optional). Leave aiEndpoint "" to let each referee use their own Anthropic key,
+  // or set it to your union's proxy address so referees need no key.
+  aiEndpoint: "",
+  // AI plug-in: to use a different AI service, replace null with a function, e.g.
+  // aiPlugin: async ({ system, user }) => { const r = await fetch("https://your-server/write", { method: "POST", body: JSON.stringify({ system, user }) }); return (await r.json()).text; },
+  // It must return the report text (optionally followed by a line ---QUESTIONS--- and a list of missing details).
+  aiPlugin: null,
+  aiModel: "claude-sonnet-5-5",
+  privacyNote: "The personal information collected in this form is processed by WPRU in accordance with the applicable WPRU Privacy Policy, available on request."
+};
+
+</script>
+<script>
+// Club (community) rugby. Law references taken from "Laws of the Game, Rugby Union 2026" (Law 9 numbering matches WPRU form).
+window.LAWS = [
+  { g: "Obstruction", items: [
+    ["9.1", "Running for the ball: charge or push other than shoulder-to-shoulder"],
+    ["9.2", "Offside player intentionally obstructing / interfering with play"],
+    ["9.3", "Intentionally preventing an opponent tackling the ball-carrier"],
+    ["9.4", "Intentionally preventing an opponent the opportunity to play the ball"],
+    ["9.5", "Ball-carrier intentionally running into an offside team-mate"],
+    ["9.6", "Obstructing / interfering with an opponent while the ball is dead"]]},
+  { g: "Unfair play", items: [
+    ["9.7.a", "Intentionally infringing a law"],
+    ["9.7.b", "Intentionally knocking / throwing the ball from the playing area"],
+    ["9.7.c", "Doing anything that may lead officials to think an opponent infringed"],
+    ["9.7.d", "Wasting time"]]},
+  { g: "Repeated infringements", items: [
+    ["9.8", "Team repeatedly committing the same offence"],
+    ["9.9", "Player repeatedly infringing the laws"],
+    ["9.10", "Different players repeating the same offence after general caution"]]},
+  { g: "Dangerous play", items: [
+    ["9.11", "Reckless or dangerous play (incl. leading with elbow/forearm; jumping into or over a tackler)"],
+    ["9.12", "Physical or verbal abuse (biting, punching, eye contact, striking, stamping, tripping, kicking)"],
+    ["9.13", "Early, late or dangerous tackle (incl. head contact / above sanction line)"],
+    ["9.14", "Tackling an opponent not in possession"],
+    ["9.15", "Holding / pushing / charging / obstructing an opponent without the ball"],
+    ["9.16", "Charging or knocking down a ball-carrier without attempting to grasp"],
+    ["9.17", "Tackling / charging / pulling / grasping an opponent whose feet are off the ground"],
+    ["9.18", "Lifting an opponent and dropping or driving them so head / upper body hit the ground"],
+    ["9.19.a", "Scrum: front row forming at a distance and rushing"],
+    ["9.19.b", "Scrum: front-row player pulling an opponent"],
+    ["9.19.c", "Scrum: intentionally lifting an opponent / forcing them upwards"],
+    ["9.19.d", "Scrum: intentionally collapsing"],
+    ["9.20.a", "Ruck/maul: charging in without binding"],
+    ["9.20.b", "Ruck/maul: contact above the line of the shoulders"],
+    ["9.20.c", "Ruck/maul: intentionally collapsing"],
+    ["9.20.d", "Ruck/maul: rolling, pulling or twisting an opponent (jackler removal)"],
+    ["9.20.e", "Ruck/maul: dropping weight onto an opponent or targeting lower limbs"],
+    ["9.21", "Retaliation"],
+    ["9.22", "Flying wedge"],
+    ["9.23", "Attempting to kick the ball from the ball-carrier's hands"],
+    ["9.24", "Hand-off with excessive force"],
+    ["9.25", "Charging, obstructing or late tackling a kicker"],
+    ["9.26", "Lifting / supporting a team-mate and not lowering safely"]]},
+  { g: "Misconduct", items: [
+    ["9.27", "Against the spirit of good sportsmanship"],
+    ["9.28", "Disputing the referee's decisions / not stopping on the whistle"]]},
+  { g: "Cards (Law 9.29 / 9.30)", items: [
+    ["9.29", "Second yellow-card offence by same player (must be sent off)"]]},
+  { g: "Other laws", items: [
+    ["3.7", "Re-joining / replacement joining without permission to gain advantage"],
+    ["4.7", "Leaving the playing area to change clothing / banned item (Law 4)"],
+    ["17.1", "Behaviour prejudicial to the interests of the game – team official expelled from the playing enclosure (World Rugby Regulation 17.1; club rule 1.2.20)"]]}
+];
+window.POSITIONS = ["1 Loosehead prop","2 Hooker","3 Tighthead prop","4 Lock","5 Lock","6 Flanker","7 Flanker","8 Number 8","9 Scrum-half","10 Fly-half","11 Left wing","12 Inside centre","13 Outside centre","14 Right wing","15 Full-back","Replacement – front row","Replacement – back row","Replacement – back","Not known"];
+window.PHASES = ["Open play – ball in hand","Tackle","Ruck","Maul","Scrum","Lineout","Kick-off / restart","Kick (chase / catch)","Penalty / free-kick","Ball dead / after whistle","Off the ball","Other"];
+window.ZONES = ["Own in-goal","Own 22","Own 22 – halfway","Halfway – opp 22","Opposition 22","Opposition in-goal"];
+window.BODYPARTS = ["Head","Shoulder","Upper arm / elbow","Forearm / hand / fist","Knee","Foot / boot","Whole body","Other"];
+window.CONTACT = ["Head / face","Neck","Shoulder / upper chest","Torso","Hips / waist","Legs / knees","Feet / ankles","Eye area","No contact","Not known"];
+window.SIGNS = ["Loss of consciousness / unresponsive","Seizure / convulsion","Lying motionless / slow to get up","Unsteady on feet / balance problem","Grabbing / clutching head","Confused / disorientated","Blank or vacant look","Dazed / slow to respond","Vomiting","Other observed sign"];
+
+window.COMPETITIONS = ["Super League A","Super League B","Super League C","Central Region","Northern Region","Southern Region","Paarl Region","U20B","Reserve","Women","Golden Oldies","Other"];
+window.GRADES = ["1st team","2nd team","3rd team","U20","Not applicable (Women / Reserve / Golden Oldies)"];
+// Club names from the WP Club Rugby Competition Format & Rules 2026 (suggestions only; any name can be typed).
+window.CLUBS = ["Villager","Hamiltons","Durbanville-Bellville","SK Walmers","False Bay","UCT","Van Der Stel-Evergreens","Tygerberg","Union Milnerton","Brackenfell","Stellenbosch","UWC","Helderberg","Primrose","Franschhoek","Kuilsriver",
+"St Georges","Kraaifontein","Belhar","Goodwood","Collegians","Macassar","NTK","Hamlets","Bellville","Vineyards","CPUT","Young Peoples","All Saints","Violets","Hamediehs","Hands & Heart",
+"Kylemore","Gardens","Rangers","Pniel Villagers","Scottsdene-Central","Atlantis","Strand","Delft","Langa","Busy Bee","Watsonia","Sir Lowrians","Raithby Universals","Caledonian Roses","Strand United","Eersterivier",
+"Masiphumelele","Titans","Peninsula","Retreat","Khayelitsha","Blue Jets","Imiqhayi","Rocklands","Lagunya","Young Wesley's",
+"Young Ideas","Bishop Lavis","Temp-Cities","Silvertree","Young Stars","Suburban","Thistles","Manenberg Rangers","Elsies River United","Silverleaf","Northerns",
+"Young Standards","Perel United","Violets Paarl","Paarl Rangers","Simondium","Young Gardens","Drakenstein","Riverstones","Lower Paarl","Windmeul United","Albions","Paarl",
+"Blue Stars United","Excelsior","Stellenbosch-Coronations","Blakes","Cloetesville","Police-Blackheath","Whistling Wheels","Gordons Bay Pioneers","Faure","Fisantekraal","Morning Star"];
+
+</script>
+<script>
+/* Referee Card Reports – static app for GitHub Pages. No server; data stays in this browser unless exported. */
+(function () {
+"use strict";
+const CFG = window.APP_CONFIG, LAWS = window.LAWS;
+const KEY = "wp-card-reports-v1";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const TYPES = {
+  yellow: { name: "Yellow card", long: "YELLOW CARD – Temporary suspension (sin-bin)", code: "YC", sub: "Temporary suspension" },
+  red: { name: "Red card", long: "RED CARD – Send off", code: "RC", sub: "Player sent off" },
+  blue: { name: "Blue card", long: "BLUE CARD – Suspected concussion / head-injury removal", code: "BC", sub: "Suspected concussion" },
+  abandoned: { name: "Match blown off", long: "MATCH BLOWN OFF / ABANDONED", code: "MB", sub: "Match abandoned" }
+};
+const YN = ["Yes", "No"], YNU = ["Yes", "No", "Unsure"];
+
+/* ---------- storage ---------- */
+let mem = {};
+const store = {
+  all() { try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { return mem; } },
+  save(o) { mem = o; try { localStorage.setItem(KEY, JSON.stringify(o)); return true; } catch (e) { return false; } },
+  get(id) { return this.all()[id]; },
+  put(r) { const o = this.all(); o[r.id] = r; return this.save(o); },
+  del(id) { const o = this.all(); delete o[id]; this.save(o); }
+};
+
+/* ---------- helpers ---------- */
+const getP = (o, p) => p.split(".").reduce((a, k) => (a == null ? a : a[k]), o);
+const setP = (o, p, v) => { const k = p.split("."); let a = o; k.slice(0, -1).forEach(x => a = a[x] = a[x] || {}); a[k.at(-1)] = v; };
+const empty = v => v == null || v === "" || (Array.isArray(v) && !v.length);
+const today = () => new Date().toISOString().slice(0, 10);
+const fmtDate = d => { if (!d) return "—"; const x = new Date(d + (d.length === 10 ? "T00:00" : "")); return isNaN(x) ? d : x.toLocaleDateString("en-ZA", { day: "2-digit", month: "long", year: "numeric" }); };
+const fmtDT = d => d ? new Date(d).toLocaleString("en-ZA", { dateStyle: "long", timeStyle: "medium" }) : "—";
+const rid = t => `${CFG.orgName}-${new Date().getFullYear()}-${TYPES[t].code}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+function canon(v) { if (Array.isArray(v)) return "[" + v.map(canon).join(",") + "]"; if (v && typeof v === "object") return "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + canon(v[k])).join(",") + "}"; return JSON.stringify(v); }
+async function sha(text) { try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); } catch (e) { return "unavailable"; } }
+const contentOf = r => { const c = JSON.parse(JSON.stringify(r)); delete c.hash; delete c.addenda; delete c.status; delete c.updatedAt; return c; };
+const hashReport = r => sha(canon(contentOf(r)));
+const hasLaw = (s, ...c) => (s.laws || []).some(x => c.includes(x));
+const DANGER = ["9.11", "9.13", "9.14", "9.16", "9.17", "9.18", "9.20.b", "9.20.e", "9.12", "9.25"];
+const TACKLE = ["9.13", "9.17", "9.18", "9.14", "9.16", "9.11"];
+const notAb = s => s.type !== "abandoned";
+const download = (name, text, mime) => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
+
+/* ---------- form schema ---------- */
+const P = (p, l, t, o = {}) => Object.assign({ p, l, t }, o);
+const FRONT = (pre, verb) => [
+  P(pre + ".frontRow", `Was a front-row player ${verb}?`, "radio", { req: 1, opts: YN, hint: "Club rule 4.1: front-row players may only be replaced by front-row players." }),
+  P(pre + ".frontReplacement", "Was a replacement front-row player available?", "radio", { req: s => getP(s, pre + ".frontRow") === "Yes", showIf: s => getP(s, pre + ".frontRow") === "Yes", opts: YN }),
+  P(pre + ".uncontested", "Uncontested scrums ordered as a result?", "radio", { req: s => getP(s, pre + ".frontRow") === "Yes", showIf: s => getP(s, pre + ".frontRow") === "Yes", opts: YN }),
+  P(pre + ".reduced", "Team required to finish the match with 14 players (club rule 4.1)?", "radio", { showIf: s => getP(s, pre + ".uncontested") === "Yes", opts: ["Yes", "No", "Not applicable"] })
+];
+const isOfficial = s => (s.player?.role || "").startsWith("Team official");
+const halfLen = m => { m = m || {}; const c = (m.competition || "").toLowerCase(), g = m.grade || ""; if (c.includes("women")) return 35; if (c.includes("reserve") || c.includes("golden")) return 30; if (g.startsWith("1st")) return 40; if (g.startsWith("2nd") || g === "U20") return 35; if (g.startsWith("3rd")) return 30; return null; };
+const SECTIONS = [
+  { id: "match", title: "1. Details", fields: [
+    P("cardtype", "Type of card", "ctype", { full: 1 }),
+    P("match.competition", "Competition", "select", { req: 1, opts: window.COMPETITIONS }),
+    P("match.grade", "Team played (grade)", "select", { req: 1, opts: window.GRADES }),
+    P("match.home", "Home team", "text", { req: 1, list: () => window.CLUBS }),
+    P("match.away", "Visiting team", "text", { req: 1, list: () => window.CLUBS }),
+    P("match.venue", "Venue", "text", { req: 1 }),
+    P("match.date", "Date of match", "date", { req: 1 }),
+    P("match.kickoff", "Kick-off time", "time"),
+    P("match.period", "Period of game when incident occurred", "radio", { req: 1, opts: ["1st half", "2nd half", "Extra time"], full: 1 }),
+    P("match.elapsed", "Elapsed time in match (minutes)", "number", { req: 1, min: 0, max: 130, hint: s => { const h = halfLen(s.match); return "Playing time on your watch when the incident happened." + (h ? ` Club rule 15.1: ${h} minutes per half for this team.` : ""); } }),
+    P("match.timeSource", "Source of that time", "select", { opts: ["Referee's watch", "Timekeeper", "Scoreboard", "Estimate"] }),
+    P("match.scoreHome", "Home score at the time", "number", { min: 0 }),
+    P("match.scoreAway", "Visitors' score at the time", "number", { min: 0 }),
+    P("match.conditions", "Weather / pitch conditions", "text", { hint: "e.g. dry, floodlit, wet and slippery." })
+  ]},
+  { id: "player", title: "2. Person concerned", show: notAb, fields: [
+    P("player.role", "Person concerned", "select", { req: 1, opts: ["Player", "Replacement", "Team official (technical zone / sideline)"], hint: "Team officials expelled from the playing enclosure: club rule 1.2.20 and World Rugby Regulation 17.1." }),
+    P("player.name", "Full name", "text", { req: 1, hint: "Full name and surname as on the team sheet." }),
+    P("player.team", "Team", "text", { req: 1, list: s => [s.match?.home, s.match?.away].filter(Boolean) }),
+    P("player.number", "Playing number", "text", { req: s => !isOfficial(s), showIf: s => !isOfficial(s) }),
+    P("player.position", "Playing position", "select", { req: s => !isOfficial(s), showIf: s => !isOfficial(s), opts: window.POSITIONS }),
+    P("player.captain", "Is the person the team captain?", "radio", { opts: YN, showIf: s => !isOfficial(s) }),
+    P("player.prior", "Earlier card to this player in this match?", "radio", { req: s => !isOfficial(s), showIf: s => !isOfficial(s), opts: ["None", "Yellow card"], hint: "A second yellow-card offence means a red card (Law 9.29)." }),
+    P("player.priorTime", "Time of the earlier yellow (minutes)", "number", { req: 1, min: 0, showIf: s => s.player?.prior === "Yellow card" })
+  ]},
+  { id: "law", title: "3. Law infringement", show: notAb, custom: "laws" },
+  { id: "incident", title: "4. The incident", show: s => !!s.type, fields: [
+    P("inc.phase", "Phase of play", "select", { req: notAb, opts: window.PHASES, showIf: notAb }),
+    P("inc.zone", "Where on the field", "select", { opts: window.ZONES, showIf: notAb, hint: "From the offending player's team's perspective, defending end first." }),
+    P("inc.advantage", "Advantage", "select", { opts: ["None – play stopped immediately", "Advantage played, then play stopped", "Advantage played, ball dead / play ongoing", "Not applicable"], showIf: notAb }),
+    P("inc.restart", "Sanction awarded / restart", "text", { showIf: notAb, hint: "e.g. penalty to Visitors on their 22." }),
+    P("inc.bodyPart", "Offender's body part involved", "select", { opts: window.BODYPARTS, showIf: s => notAb(s) && s.type !== "blue" }),
+    P("inc.assessment", "Your assessment of the action", "select", { req: s => s.type === "red" || s.type === "yellow", showIf: notAb, opts: ["Deliberate / intentional", "Reckless", "Careless / late", "Accidental but still a foul", "Repeated infringement", "Unable to determine"], hint: "Your professional opinion at the time. Explain it in your account." }),
+    P("inc.vName", "Opponent affected – name", "text", { rec: s => hasLaw(s, ...DANGER), showIf: s => notAb(s) && s.type !== "blue" }),
+    P("inc.vNumber", "Opponent affected – number", "text", { showIf: s => notAb(s) && s.type !== "blue" }),
+    P("inc.contact", "Part of opponent contacted", "select", { opts: window.CONTACT, rec: s => hasLaw(s, ...DANGER), showIf: s => notAb(s) && s.type !== "blue" }),
+    P("inc.injury", "Injury to opponent", "select", { opts: ["None apparent", "Treated on field, continued", "Left the field", "Replaced", "Blood injury", "Head-injury assessment / suspected concussion", "Not known"], rec: s => hasLaw(s, ...DANGER), showIf: s => notAb(s) && s.type !== "blue" }),
+    P("inc.description", "YOUR ACCOUNT – in your own words", "textarea", { req: 1, full: 1, min: 150, big: 1, hint: "Rough notes are fine. On the last step the AI turns your notes and answers into the formal report, which you preview and check. Facts only: where you were, what you saw in order, the action and contact, the result, why you decided as you did, and the exact words of anything said." }),
+    P("inc.mitigating", "Mitigating factors observed", "textarea", { full: 1, rec: s => s.type === "red" || s.type === "yellow", showIf: notAb, hint: "Anything in the player's favour (e.g. ball-carrier dropped suddenly, immediate apology, no force). Write 'None' if none." }),
+    P("inc.aggravating", "Aggravating factors observed", "textarea", { full: 1, rec: s => s.type === "red" || s.type === "yellow", showIf: notAb, hint: "e.g. force used, victim defenceless, premeditation, repeat conduct. Write 'None' if none." }),
+    P("inc.response", "Player's response / what was said", "textarea", { full: 1, rec: notAb, showIf: notAb, hint: "Quote the player's and captain's words as closely as you can." }),
+    P("inc.warnings", "Warnings or cautions given earlier to this player or team", "textarea", { full: 1, showIf: notAb })
+  ]},
+  { id: "danger", title: "4a. Dangerous contact detail", cls: "", intro: "Facts observed – not conclusions. Club (community) rugby: the high-tackle sanction line is the waist / base of the sternum (Law 14.1).", show: s => s.type !== "blue" && notAb(s) && hasLaw(s, ...TACKLE, "9.20.b"), fields: [
+    P("dc.headContact", "Was there contact with the head or neck?", "radio", { req: 1, opts: YNU }),
+    P("dc.firstContact", "First point of contact on opponent", "select", { opts: window.CONTACT }),
+    P("dc.arms", "Tackler's arms", "select", { opts: ["Wrapped around the opponent", "Attempted to wrap", "No attempt to wrap", "Shoulder / arm led the contact", "Not applicable"] }),
+    P("dc.tacklerHeight", "Tackler's body position", "select", { opts: ["Upright", "Bent at waist", "Dropping / dipping", "Off the ground", "Not known"] }),
+    P("dc.carrierHeight", "Ball-carrier's body position", "select", { opts: ["Upright", "Dropping / dipping suddenly", "Falling / stumbling", "Being lifted / off the ground", "Not known"] }),
+    P("dc.force", "Force of contact", "select", { opts: ["Low", "Moderate", "High"] }),
+    P("dc.open", "Open-field play at the time (Law 9.13)?", "radio", { opts: YNU })
+  ]},
+  { id: "decision", title: "5. Decision and process", show: s => !!s.type, fields: [
+    P("dec.detected", "Incident detected / referred by", "radio", { req: 1, full: 1, opts: ["Referee", "Assistant referee 1", "Assistant referee 2", "TMO / video official", "Other"], hint: "A separate report is needed from each official who contributes." }),
+    P("dec.cardTime", "Time card shown (minutes)", "number", { req: notAb, min: 0, showIf: notAb }),
+    P("dec.tmo", "Was a TMO / video review used?", "radio", { rec: 1, opts: ["Yes", "No", "No TMO appointed"] }),
+    P("dec.tmoOutcome", "TMO review outcome", "text", { req: 1, showIf: s => s.dec?.tmo === "Yes" }),
+    P("dec.individual", "(a) Individual caution issued?", "radio", { req: notAb, opts: YN, showIf: notAb }),
+    P("dec.general", "(b) General caution issued to team?", "radio", { req: notAb, opts: YN, showIf: notAb }),
+    P("dec.captain", "Captain spoken to?", "radio", { rec: notAb, opts: YN, showIf: notAb }),
+    P("dec.captainNotes", "What was said to the captain, and when", "textarea", { full: 1, showIf: s => s.dec?.captain === "Yes" })
+  ]},
+  { id: "yellow", title: "5a. Yellow card details", cls: "cy", show: s => s.type === "yellow", intro: "Club rule 2.1.2 / 2.1.6: card reports are completed at the admin table immediately after the match, before you verify the score on Footprint.", fields: [
+    P("yc.eligible", "Eligible to return at (match minute)", "number", { req: 1, min: 0, hint: "10 minutes of playing time from the card (Law 9.29)." }),
+    ...FRONT("yc", "suspended"),
+    P("yc.returned", "Did the player return correctly / on time?", "radio", { opts: ["Yes", "No", "Not applicable"] }),
+    P("yc.notes", "Other notes", "textarea", { full: 1 })
+  ]},
+  { id: "red", title: "5b. Red card details", cls: "cr", show: s => s.type === "red", intro: "Club rule 2.1.2 / 2.1.6: complete this report at the admin table immediately after the match and before you verify the score on Footprint. A player who is sent off may not be replaced (Law 9.30, community rugby).", fields: [
+    P("rc.kind", "Basis of the red card", "select", { req: 1, opts: ["Direct red card – single act", "Second yellow-card offence (Law 9.29)", "Misconduct (e.g. Law 4.7 / 3.7)", "Other"] }),
+    P("rc.left", "Did the person leave the playing area immediately?", "radio", { req: 1, opts: ["Yes", "Delayed", "Refused / had to be told repeatedly"] }),
+    P("rc.further", "Further misconduct after the card (words / actions)", "textarea", { full: 1, rec: 1, hint: "Quote exact words. Write 'None' if none." }),
+    P("rc.informed", "Player / captain told a report would be submitted?", "radio", { rec: 1, opts: YN }),
+    ...FRONT("rc", "sent off"),
+    P("rc.notes", "Other notes", "textarea", { full: 1 })
+  ]},
+  { id: "blue", title: "5c. Blue card – suspected concussion", cls: "cb", show: s => s.type === "blue", intro: "Law 3.24 ‘Recognise and Remove’ and club rule 2.1.8: a player suspected of concussion must be permanently removed, and this must also be confirmed by the medical team at the field. Record what was observed; this is not a diagnosis.", fields: [
+    P("bc.signs", "Signs observed", "chips", { req: 1, full: 1, opts: window.SIGNS }),
+    P("bc.mechanism", "How the head impact or event happened", "textarea", { req: 1, full: 1, hint: "What occurred immediately before the player went down or showed signs; any head contact you saw." }),
+    P("bc.foul", "Was foul play involved?", "radio", { req: 1, opts: YNU }),
+    P("bc.foulRef", "Report number of the related yellow / red card report", "text", { showIf: s => s.bc?.foul === "Yes", rec: 1 }),
+    P("bc.by", "Who identified the signs?", "select", { req: 1, opts: ["Referee", "Assistant referee", "Doctor / medical practitioner", "Physiotherapist / first-aider", "Team staff", "Other"] }),
+    P("bc.medical", "Medical person who attended", "radio", { req: 1, opts: ["Doctor", "Physiotherapist", "First-aider / medic", "None present"], hint: "Club rule 1.1.2: trained medical personnel must be at the field." }),
+    P("bc.medName", "Name of the medical person", "text", { rec: s => s.bc?.medical && s.bc.medical !== "None present" }),
+    P("bc.confirmed", "Concussion suspicion confirmed by the medical team at the field? (club rule 2.1.8)", "radio", { req: 1, full: 1, opts: ["Yes", "No – medical team did not confirm", "No medical team present"] }),
+    P("bc.removed", "Time the player left the field (minutes)", "number", { req: 1, min: 0 }),
+    P("bc.replacement", "Replacement's name / number", "text"),
+    P("bc.frontRow", "Was the player a front-row player?", "radio", { req: 1, opts: YN, hint: "Club rule 4.1: front-row players may only be replaced by front-row players." }),
+    P("bc.frontReplacement", "Was a replacement front-row player available?", "radio", { req: s => s.bc?.frontRow === "Yes", showIf: s => s.bc?.frontRow === "Yes", opts: YN }),
+    P("bc.eight", "Team kept 15 players with eight in the scrum (Recognise & Remove exception, club rule 4.1)?", "radio", { req: s => s.bc?.frontRow === "Yes" && s.bc?.frontReplacement === "No", showIf: s => s.bc?.frontRow === "Yes" && s.bc?.frontReplacement === "No", full: 1, opts: ["Yes", "No", "Not applicable"] }),
+    P("bc.attitude", "Player's cooperation", "select", { opts: ["Left immediately", "Reluctant, then left", "Resisted removal", "Unable to respond"] }),
+    P("bc.advised", "Player and team told the player may not return to play and must follow the concussion protocol", "radio", { req: 1, full: 1, opts: YN }),
+    P("bc.notes", "Other notes", "textarea", { full: 1 })
+  ]},
+  { id: "abandon", title: "5d. Match blown off", cls: "", show: s => s.type === "abandoned", fields: [
+    P("ab.reason", "Primary reason", "select", { req: 1, opts: ["Player safety / injury", "Foul play by players", "Spectator / crowd trouble", "Bench / coach / official conduct", "Insufficient players", "Ground or weather conditions", "Other"] }),
+    P("ab.time", "Time abandoned (minutes)", "number", { req: 1, min: 0 }),
+    P("ab.persons", "Persons involved (names, roles, teams)", "textarea", { full: 1, req: 1 }),
+    P("ab.score", "Score when abandoned", "text", { rec: 1 }),
+    P("ab.informed", "Who was informed, and when", "textarea", { full: 1, rec: 1 })
+  ]},
+  { id: "evidence", title: "6. Evidence and witnesses", show: s => !!s.type, fields: [
+    P("ev.video", "Video evidence available?", "select", { req: 1, opts: ["Yes – TMO / broadcast", "Yes – team or club filming", "Yes – other", "No", "Not known"] }),
+    P("ev.videoDetail", "Where it is held / who filmed it", "text", { rec: s => s.ev?.video?.startsWith("Yes"), hint: "Name, club or channel and the time range." }),
+    P("ev.witnesses", "Other witnesses (name, role, contact)", "textarea", { full: 1, rec: 1, hint: "Other officials, medical staff, touch judges, timekeeper, team managers." }),
+    P("ev.other", "Anything else the disciplinary panel should know", "textarea", { full: 1 })
+  ]},
+  { id: "officials", title: "7. Match officials", custom: "officials", show: s => !!s.type },
+  { id: "report", title: "8. Your report – write, preview and check", custom: "report", show: s => !!s.type },
+  { id: "decl", title: "9. Check, declare and sign", custom: "sign", show: s => !!s.type }
+];
+
+/* ---------- state ---------- */
+let R = null, showErrors = false, dirtyTimer = null, lastSig = "";
+
+function blank(type) {
+  return { id: type ? rid(type) : "", type, status: "draft", createdAt: new Date().toISOString(), match: { date: today() }, narrative: "",
+    player: {}, laws: [], inc: {}, dc: {}, dec: {}, yc: {}, rc: {}, bc: {}, ab: {}, ev: {},
+    officials: [{ role: "Referee" }, { role: "Assistant referee 1" }, { role: "Assistant referee 2" }], reporter: null, decl: {} };
+}
+const isShown = (sec, s) => !sec.show || sec.show(s);
+const fShown = (f, s) => !f.showIf || f.showIf(s);
+const fReq = (f, s) => typeof f.req === "function" ? f.req(s) : !!f.req;
+const fRec = (f, s) => typeof f.rec === "function" ? f.rec(s) : !!f.rec;
+const visSig = s => SECTIONS.map(x => isShown(x, s) ? 1 : 0).join("") + SECTIONS.flatMap(x => x.fields || []).map(f => fShown(f, s) && (fReq(f, s) ? "R" : fRec(f, s) ? "r" : "-")).join("") + (s.laws || []).join(",") + "|" + halfLen(s.match) + "|" + (s.player?.role || "");
+
+/* completeness: returns [{id,label,level,anchor}] */
+function check(s) {
+  const out = [];
+  if (!s.type) return [{ level: "req", label: "Choose the card type", anchor: "cardtype" }];
+  SECTIONS.forEach(sec => {
+    if (!isShown(sec, s)) return;
+    (sec.fields || []).forEach(f => {
+      if (!fShown(f, s)) return;
+      const v = getP(s, f.p), req = fReq(f, s), rec = fRec(f, s);
+      if (req && empty(v)) out.push({ level: "req", label: f.l, anchor: f.p });
+      else if (req && f.min && f.t === "textarea" && String(v).length < f.min) out.push({ level: "req", label: `${f.l} (at least ${f.min} characters; now ${String(v).length})`, anchor: f.p });
+      else if (rec && empty(v)) out.push({ level: "rec", label: f.l, anchor: f.p });
+      else if (f.p === "inc.description" && String(v).length < 400) out.push({ level: "rec", label: "Description: aim for a full account (400+ characters)", anchor: f.p });
+    });
+  });
+  const hl = halfLen(s.match), el = s.match?.elapsed;
+  if (hl && el > 2 * hl + 10) out.push({ level: "rec", label: `Elapsed time (${el} min) is longer than a ${2 * hl}-minute match`, anchor: "match.elapsed" });
+  if (empty(s.narrative)) out.push({ level: "req", label: "Report text – use “Write my report with AI”, “Build a draft” or “Use my notes as written”", anchor: "narrative" });
+  else if (/\[[^\]]+\]/.test(s.narrative)) out.push({ level: "req", label: "Replace or delete the [bracketed prompts] in the report text", anchor: "narrative" });
+  if (!s.decl?.checked) out.push({ level: "req", label: "Confirm you have checked the whole report", anchor: "decl.checked" });
+  if (notAb(s) && !(s.laws || []).length) out.push({ level: "req", label: "Law infringement", anchor: "laws" });
+  const rp = s.reporter, o = rp != null ? s.officials[rp] : null;
+  if (rp == null) out.push({ level: "req", label: "Reporting official (who is signing)", anchor: "reporter" });
+  else {
+    if (empty(o.name)) out.push({ level: "req", label: "Reporting official's name", anchor: "officials.name" });
+    if (empty(o.phone)) out.push({ level: "req", label: "Reporting official's contact number", anchor: "officials.phone" });
+    if (empty(o.email) || !/^\S+@\S+\.\S+$/.test(o.email)) out.push({ level: "req", label: "Reporting official's valid e-mail", anchor: "officials.email" });
+  }
+  if (!s.decl?.agree) out.push({ level: "req", label: "Tick the declaration", anchor: "decl.agree" });
+  if (empty(s.decl?.typed)) out.push({ level: "req", label: "Type your full name", anchor: "decl.typed" });
+  if (empty(s.decl?.sig)) out.push({ level: "req", label: "Draw your signature", anchor: "sig" });
+  return out;
+}
+
+/* ---------- field rendering ---------- */
+function fieldHTML(f, s) {
+  if (f.t === "ctype") {
+    const err = showErrors && !s.type;
+    return `<div class="f full${err ? " err" : ""}" data-anchor="cardtype"><label for="f_ctype">${esc(f.l)} <span class="req" aria-hidden="true">*</span></label><select id="f_ctype" data-ctype><option value="">Select the card type…</option>${Object.entries(TYPES).map(([k, v]) => `<option value="${k}" ${s.type === k ? "selected" : ""}>${esc(v.name)} – ${esc(v.sub)}</option>`).join("")}</select><div class="hint">One form for every card: the steps after this one adapt to the card you choose.</div>${s.type === "blue" ? '<div class="note">Blue card: a player removed for suspected concussion (Law 3.24 Recognise and Remove; club rule 2.1.8). Record what you observed – referees do not diagnose.</div>' : ""}${err ? '<div class="errmsg">Choose a card type.</div>' : ""}</div>`;
+  }
+  const hintTxt = typeof f.hint === "function" ? f.hint(s) : f.hint;
+  const v = getP(s, f.p), id = "f_" + f.p.replace(/\./g, "_"), req = fReq(f, s);
+  const lab = `${esc(f.l)}${req ? ' <span class="req" aria-hidden="true">*</span>' : ""}`;
+  const err = showErrors && req && (empty(v) || (f.min && f.t === "textarea" && String(v).length < f.min));
+  let ctl = "";
+  if (f.t === "select") ctl = `<select id="${id}" data-p="${f.p}"><option value="">Select…</option>${f.opts.map(o => `<option ${v === o ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+  else if (f.t === "radio" || f.t === "chips") {
+    const multi = f.t === "chips";
+    ctl = `<div class="opts" role="${multi ? "group" : "radiogroup"}" aria-label="${esc(f.l)}">${f.opts.map(o => { const on = multi ? (v || []).includes(o) : v === o; return `<label class="opt"><input type="${multi ? "checkbox" : "radio"}" name="${id}" data-p="${f.p}" data-v="${esc(o)}" ${on ? "checked" : ""}>${esc(o)}</label>`; }).join("")}</div>`;
+  } else if (f.t === "textarea") ctl = `<textarea id="${id}" data-p="${f.p}" rows="${f.big ? 9 : 3}">${esc(v || "")}</textarea>` + (f.min ? `<div class="hint" data-count="${f.p}">${String(v || "").length} characters (minimum ${f.min})</div>` : "") ;
+  else {
+    let extra = "", list = "";
+    if (f.t === "number") extra = ` inputmode="numeric" min="${f.min ?? ""}" max="${f.max ?? ""}"`;
+    if (f.list) { list = ` list="dl_${id}"`; ctl = `<datalist id="dl_${id}">${f.list(s).map(o => `<option value="${esc(o)}">`).join("")}</datalist>`; }
+    ctl += `<input id="${id}" type="${f.t}" data-p="${f.p}" value="${esc(v ?? "")}"${extra}${list} autocomplete="off">`;
+  }
+  const isGroup = f.t === "radio" || f.t === "chips";
+  return `<div class="f${f.full ? " full" : ""}${err ? " err" : ""}" data-anchor="${f.p}">${isGroup ? `<div class="lab">${lab}</div>` : `<label for="${id}">${lab}</label>`}${hintTxt ? `<div class="hint">${esc(hintTxt)}</div>` : ""}${ctl}${err ? '<div class="errmsg">This is required.</div>' : ""}</div>`;
+}
+function lawsHTML(s) {
+  const err = showErrors && !(s.laws || []).length;
+  return `<div class="f full${err ? " err" : ""}" data-anchor="laws"><div class="hint">Select every Law that applies (numbering follows ${esc(CFG.lawsEdition)} and the ${esc(CFG.orgName)} form). Put the most serious first by selecting it first.</div>
+  <div class="laws" role="group" aria-label="Law infringements">${LAWS.map(g => `<h4>${esc(g.g)}</h4>${g.items.map(([c, t]) => `<label class="lawrow"><input type="checkbox" data-law="${c}" ${(s.laws || []).includes(c) ? "checked" : ""}><code>${c}</code><span>${esc(t)}</span></label>`).join("")}`).join("")}</div>
+  <div class="chosen" id="chosen">${chosenHTML(s)}</div>${err ? '<div class="errmsg">Select at least one law.</div>' : ""}</div>`;
+}
+const chosenHTML = s => (s.laws || []).map((c, i) => `<span class="pill">${i === 0 ? "Primary: " : ""}Law ${c}</span>`).join("") || '<span class="hint">None selected</span>';
+function officialsHTML(s) {
+  const rows = s.officials.map((o, i) => `<tr><td><b>${esc(o.role)}</b></td>
+    <td><input type="text" data-p="officials.${i}.name" value="${esc(o.name || "")}" aria-label="${esc(o.role)} name" placeholder="Name"></td>
+    <td><input type="tel" data-p="officials.${i}.phone" value="${esc(o.phone || "")}" aria-label="${esc(o.role)} contact number" placeholder="Contact number"></td>
+    <td><input type="email" data-p="officials.${i}.email" value="${esc(o.email || "")}" aria-label="${esc(o.role)} e-mail" placeholder="E-mail"></td>
+    <td><label class="opt"><input type="radio" name="reporter" data-reporter="${i}" ${s.reporter === i ? "checked" : ""}> I am this official</label></td></tr>`).join("");
+  const err = showErrors && s.reporter == null;
+  return `<div class="f full${err ? " err" : ""}" data-anchor="reporter"><div class="hint">As on the ${esc(CFG.orgName)} form. Each official who contributes files a separate report; select the row that is you. Other rows are optional.</div>
+  <div class="tablewrap"><table><thead><tr><th>Role</th><th>Name</th><th>Contact</th><th>E-mail</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>${err ? '<div class="errmsg">Select which official you are.</div>' : ""}
+  <div class="fields" style="margin-top:10px"><div class="f full"><label for="f_soc">Referee society / association (optional)</label><input id="f_soc" type="text" data-p="society" value="${esc(s.society || "")}"></div></div></div>`;
+}
+function signHTML(s) {
+  const d = s.decl || {};
+  return `<div class="fields">
+   <div class="f full${showErrors && !d.checked ? " err" : ""}" data-anchor="decl.checked"><label class="lawrow" style="cursor:pointer"><input type="checkbox" data-p="decl.checked" ${d.checked ? "checked" : ""}><span><b>I have checked this report.</b> I have read the whole preview above, compared every statement with what I saw and did, and corrected anything that is wrong or that I cannot confirm. I understand any AI-written wording is only a draft for me to check, and that I am responsible for the contents.</span></label></div>
+   <div class="f full${showErrors && !d.agree ? " err" : ""}" data-anchor="decl.agree"><label class="lawrow" style="cursor:pointer"><input type="checkbox" data-p="decl.agree" ${d.agree ? "checked" : ""}><span>I declare that this report is a true and accurate account of what I personally saw, heard and did, made as soon as practicable after the match, and that I understand it may be used in disciplinary proceedings.</span></label></div>
+   <div class="f${showErrors && empty(d.typed) ? " err" : ""}" data-anchor="decl.typed"><label for="f_typed">Type your full name <span class="req">*</span></label><input id="f_typed" type="text" data-p="decl.typed" value="${esc(d.typed || "")}" autocomplete="name"></div>
+   <div class="f full${showErrors && empty(d.sig) ? " err" : ""}" data-anchor="sig"><div class="lab">Signature <span class="req">*</span></div><canvas class="sigpad" id="sig" aria-label="Signature pad: draw your signature"></canvas>
+     <div class="row"><button type="button" class="btn small" id="sigClear">Clear signature</button><span class="hint">Draw with finger, stylus or mouse.</span></div></div></div>`;
+}
+
+const STEPS = [
+  { id: "match", t: "Details", secs: ["match"] },
+  { id: "player", t: "Player & law", secs: ["player", "law"] },
+  { id: "incident", t: "Incident", secs: ["incident", "danger"] },
+  { id: "decision", t: "Decision", secs: ["decision", "yellow", "red", "blue", "abandon"] },
+  { id: "evidence", t: "Evidence & officials", secs: ["evidence", "officials"] },
+  { id: "review", t: "Report & sign", secs: ["report", "decl"] }
+];
+let stepId = "match", visited = new Set(["match"]);
+const secById = id => SECTIONS.find(x => x.id === id);
+function visibleSteps(s) { if (!s.type) return [STEPS[0]]; return STEPS.filter(st => st.secs.some(id => id === "cardtype" || (secById(id) && isShown(secById(id), s)))); }
+function curStep(s) { const v = visibleSteps(s); return v.find(x => x.id === stepId) || v[0]; }
+function stepForAnchor(a) {
+  if (a === "cardtype") return "match"; if (a === "laws") return "player"; if (a === "reporter" || a.startsWith("officials")) return "evidence"; if (a.startsWith("decl") || a === "sig" || a === "narrative") return "review";
+  const sec = SECTIONS.find(x => (x.fields || []).some(f => f.p === a)); const st = sec && STEPS.find(t => t.secs.includes(sec.id)); return st ? st.id : null;
+}
+function missByStep(s) { const o = {}; check(s).filter(i => i.level === "req").forEach(i => { const k = stepForAnchor(i.anchor); if (k) o[k] = (o[k] || 0) + 1; }); return o; }
+function stepperHTML(s) {
+  const v = visibleSteps(s), cur = curStep(s), miss = missByStep(s);
+  return `<nav class="steps" aria-label="Report sections">${v.map((st, i) => { const n = miss[st.id] || 0, seen = visited.has(st.id) || showErrors; const badge = seen && s.type ? (n ? `<em class="bad" title="${n} required missing">${n}</em>` : '<em class="ok" title="Complete">✓</em>') : ""; return `<button type="button" class="step${st.id === cur.id ? " on" : ""}" data-step="${st.id}" ${st.id === cur.id ? 'aria-current="step"' : ""}><span class="n">${i + 1}</span><span class="t">${esc(st.t)}</span>${badge}</button>`; }).join("")}</nav>`;
+}
+function navHTML(s) {
+  const v = visibleSteps(s), cur = curStep(s), i = v.indexOf(cur);
+  const next = !s.type ? '<button class="btn primary" disabled>Choose a card type to continue</button>' : i < v.length - 1 ? `<button type="button" class="btn primary" data-next>Next: ${esc(v[i + 1].t)} →</button>` : '<button type="button" class="btn primary" data-fin>Review &amp; finalise</button>';
+  return `<div class="stepnav row"><button type="button" class="btn" data-back ${i ? "" : "disabled"}>← Back</button><span class="spacer"></span>${next}</div>`;
+}
+function formHTML(s) {
+  const cur = curStep(s); let h = stepperHTML(s);
+  SECTIONS.forEach(sec => {
+    if (!cur.secs.includes(sec.id) || !isShown(sec, s) || (!s.type && sec.id !== "match")) return;
+    h += `<section class="card sect ${sec.cls || ""}" id="sec_${sec.id}"><h2>${esc(sec.title.replace(/^\d+[a-d]?\. /, ""))}</h2>${sec.intro ? `<div class="note ${sec.id === "red" ? "warn" : ""}">${esc(sec.intro)}</div>` : ""}`;
+    if (sec.custom === "laws") h += lawsHTML(s);
+    else if (sec.custom === "officials") h += officialsHTML(s);
+    else if (sec.custom === "sign") h += signHTML(s);
+    else if (sec.custom === "report") h += reportHTML(s);
+    else h += `<div class="fields">${sec.fields.filter(f => fShown(f, s)).map(f => fieldHTML(f, s)).join("")}</div>`;
+    h += `</section>`;
+  });
+  return h + navHTML(s);
+}
+function goStep(id, anchor) {
+  visited.add(curStep(R).id); stepId = id; paint(); visited.add(id);
+  if (anchor) focusAnchor(anchor); else window.scrollTo({ top: 0 });
+}
+function focusAnchor(a) {
+  const el = $(`[data-anchor="${a}"]`) || $(`[data-anchor="${a.startsWith("officials") ? "reporter" : a}"]`);
+  if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); const i = $("input,select,textarea,canvas", el); i && i.focus && i.focus({ preventScroll: true }); }
+}
+function sideHTML(s) {
+  const items = check(s), req = items.filter(i => i.level === "req"), rec = items.filter(i => i.level === "rec");
+  const total = (() => { let n = 0; SECTIONS.forEach(sec => { if (isShown(sec, s)) (sec.fields || []).forEach(f => { if (fShown(f, s) && fReq(f, s)) n++; }); }); return n + 8; })();
+  const pct = s.type ? Math.max(0, Math.min(100, Math.round(100 * (total - req.length) / total))) : 0;
+  return `<div class="card"><h2>Report strength</h2><div class="meter" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+   <div><b>${pct}%</b> of required items · ${req.length} missing${rec.length ? ` · ${rec.length} recommended` : ""}</div>
+   <ul class="checks">${req.map(i => `<li class="miss" data-go="${i.anchor}"><span class="mk">✗</span><span>${esc(i.label)}</span></li>`).join("")}${rec.map(i => `<li class="rec" data-go="${i.anchor}"><span class="mk">!</span><span>${esc(i.label)} <i class="hint">(recommended)</i></span></li>`).join("")}${!items.length ? '<li class="ok"><span class="mk">✓</span><span>Everything needed for a strong report is in.</span></li>' : ""}</ul>
+   <div class="row" style="margin-top:12px"><button class="btn primary" id="finalise">Review &amp; finalise</button></div>
+   <p class="hint" style="margin-top:8px">Finalising locks the report, stamps the time and seals it with a SHA-256 fingerprint.</p></div>
+   <div class="card"><div class="saved" id="savedAt">${s.updatedAt ? "Draft saved on this device " + new Date(s.updatedAt).toLocaleTimeString() : "Draft not saved yet"}</div><div class="row" style="margin-top:8px"><button class="btn small danger" id="discard">Discard draft</button></div></div>`;
+}
+
+/* ---------- editor view ---------- */
+function editor(id) {
+  const existing = id && id !== "new" ? store.get(id) : null;
+  if (id && id !== "new" && !existing) { return notFound(); }
+  if (existing && existing.status === "final") { location.hash = "#/view/" + id; return; }
+  R = existing || blank("");
+  showErrors = false; stepId = "match"; visited = new Set(["match"]);
+  const app = $("#app");
+  app.innerHTML = `<h1>${existing ? "Edit draft report" : "New card report"}</h1><p class="sub">One form for every card: choose the card type on the first step and the later steps adapt. Required fields are marked <span class="req">*</span>. Your progress saves automatically on this device.</p><p class="note">Club rule 2.1.2 / 2.1.6: card reports are completed at the admin table immediately after the match, and before you verify the score on Footprint.</p>
+   <div class="layout"><div id="formBody"></div><aside class="side" id="side"></aside></div>`;
+  paint();
+}
+function paint(keep) {
+  const fb = $("#formBody"); if (!fb) return;
+  const a = document.activeElement, ap = a?.dataset?.p, pos = a?.selectionStart, y = window.scrollY;
+  fb.innerHTML = formHTML(R); $("#side").innerHTML = sideHTML(R); lastSig = visSig(R);
+  wire(); initSig();
+  if (ap) { const el = $(`[data-p="${ap}"]:not([type=radio]):not([type=checkbox])`, fb); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) { } } }
+  window.scrollTo(0, y);
+}
+function schedule() { clearTimeout(dirtyTimer); dirtyTimer = setTimeout(persist, 350); }
+function persist() { if (!R || R.status === "final") return; if (!R.type) return; R.updatedAt = new Date().toISOString(); store.put(R); const e = $("#savedAt"); if (e) e.textContent = "Draft saved on this device " + new Date().toLocaleTimeString(); }
+function afterChange() {
+  schedule();
+  const sig = visSig(R);
+  if (sig !== lastSig) paint(); else { refreshPreview(); $("#side").innerHTML = sideHTML(R); wireSide(); const sn = $(".steps"); if (sn) sn.outerHTML = stepperHTML(R); const c = $("#chosen"); if (c) c.innerHTML = chosenHTML(R); }
+}
+function wire() {
+  const fb = $("#formBody");
+  fb.oninput = e => {
+    const t = e.target, p = t.dataset.p; if (!p || t.type === "radio" || t.type === "checkbox") return;
+    setP(R, p, t.type === "number" && t.value !== "" ? Number(t.value) : t.value);
+    if (t.value) t.closest(".f")?.classList.remove("err");
+    const c = $(`[data-count="${p}"]`, fb); if (c) { const f = SECTIONS.flatMap(x => x.fields || []).find(x => x.p === p); c.textContent = `${t.value.length} characters (minimum ${f.min})`; }
+    afterChange();
+  };
+  fb.onclick = e => {
+    const t = e.target.closest("[data-step],[data-next],[data-back],[data-fin],[data-ai]"); if (!t) return;
+    const v = visibleSteps(R), i = v.indexOf(curStep(R));
+    if (t.dataset.step) goStep(t.dataset.step); else if (t.hasAttribute("data-next")) goStep(v[i + 1].id); else if (t.hasAttribute("data-back")) goStep(v[i - 1].id); else if (t.hasAttribute("data-fin")) tryFinalise(); else if (t.dataset.ai) aiAction(t.dataset.ai);
+  };
+  fb.onchange = e => {
+    const t = e.target;
+    if (t.hasAttribute("data-ctype")) { if (!t.value) { R.type = ""; paint(); } else changeType(t.value); return; }
+    if (t.dataset.law) { const L = new Set(R.laws || []); const arr = [...(R.laws || [])]; const i = arr.indexOf(t.dataset.law); if (t.checked && i < 0) arr.push(t.dataset.law); if (!t.checked && i >= 0) arr.splice(i, 1); R.laws = arr; afterChange(); return; }
+    if (t.dataset.reporter != null) { R.reporter = Number(t.dataset.reporter); afterChange(); return; }
+    const p = t.dataset.p; if (!p) return;
+    if (t.type === "radio") setP(R, p, t.dataset.v);
+    else if (t.type === "checkbox" && t.dataset.v) { const a = new Set(getP(R, p) || []); t.checked ? a.add(t.dataset.v) : a.delete(t.dataset.v); setP(R, p, [...a]); }
+    else if (t.type === "checkbox") setP(R, p, t.checked);
+    else if (t.tagName === "SELECT") setP(R, p, t.value);
+    afterChange();
+  };
+  wireSide();
+}
+function wireSide() {
+  $$("[data-go]").forEach(li => li.onclick = () => { const a = li.dataset.go, sid = stepForAnchor(a); if (sid && sid !== curStep(R).id) { goStep(sid, a); } else focusAnchor(a); });
+  const fin = $("#finalise"); if (fin) fin.onclick = tryFinalise;
+  const d = $("#discard"); if (d) d.onclick = () => confirmBox("Discard this draft?", "The unsaved draft will be deleted from this device.", "Discard", () => { store.del(R.id); location.hash = "#/dashboard"; });
+}
+function changeType(t) {
+  const old = R.id; R.type = t;
+  if (!old || !old.includes("-" + TYPES[t].code + "-")) { R.id = rid(t); if (old && store.get(old)) store.del(old); }
+  persist(); paint();
+}
+
+/* ---------- AI report writer (plug-in) ---------- */
+const AIK = "wp-ai-settings", DEFAULT_EP = "https://api.anthropic.com/v1/messages";
+const aiCfg = () => { let o = {}; try { o = JSON.parse(localStorage.getItem(AIK) || "{}"); } catch (e) { } return { key: o.key || "", endpoint: o.endpoint || CFG.aiEndpoint || DEFAULT_EP, model: CFG.aiModel || "claude-sonnet-5-5" }; };
+const lawText = c => { const it = LAWS.flatMap(g => g.items).find(x => x[0] === c); return it ? it[1] : ""; };
+const lc = v => String(v || "").toLowerCase();
+const posName = v => lc(String(v || "").replace(/^\d+\s+/, ""));
+const escRe = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/* names are replaced by tokens before anything leaves the browser, and put back afterwards */
+function maskMap(s) {
+  const m = [], add = (real, tok) => { real = String(real || "").trim(); if (real.length >= 3) m.push([real, tok]); const parts = real.split(/\s+/); if (parts.length > 1 && parts.at(-1).length >= 3) m.push([parts.at(-1), tok]); };
+  add(s.player?.name, "[PLAYER]"); add(s.inc?.vName, "[OPPONENT]"); add(s.bc?.medName, "[MEDIC]");
+  (s.officials || []).forEach((o, i) => add(o.name, i === s.reporter ? "[REFEREE]" : `[OFFICIAL${i + 1}]`));
+  return m.sort((a, b) => b[0].length - a[0].length);
+}
+const mask = (t, m) => m.reduce((a, [r, k]) => a.replace(new RegExp("(^|[^A-Za-z0-9])" + escRe(r) + "(?![A-Za-z0-9])", "gi"), (x, pre) => pre + k), String(t || ""));
+function unmask(t, s) {
+  const map = { "[PLAYER]": s.player?.name, "[OPPONENT]": s.inc?.vName, "[REFEREE]": s.officials?.[s.reporter]?.name, "[MEDIC]": s.bc?.medName };
+  (s.officials || []).forEach((o, i) => map[`[OFFICIAL${i + 1}]`] = o.name);
+  return String(t).replace(/\[(PLAYER|OPPONENT|REFEREE|MEDIC|OFFICIAL\d)\]/g, x => map[x] || x);
+}
+function factsText(s, m) {
+  const L = [], add = (k, v) => { if (!empty(v)) L.push(`${k}: ${mask(Array.isArray(v) ? v.join("; ") : v, m)}`); };
+  add("Card type", TYPES[s.type].long);
+  SECTIONS.forEach(sec => { if (!sec.fields || !isShown(sec, s)) return; sec.fields.forEach(f => {
+    if (!fShown(f, s) || f.p === "cardtype" || f.p === "inc.description") return;
+    const v = getP(s, f.p);
+    if (f.p === "player.name") add(f.l, v ? "[PLAYER]" : ""); else if (f.p === "inc.vName") add(f.l, v ? "[OPPONENT]" : ""); else if (f.p === "bc.medName") add(f.l, v ? "[MEDIC]" : ""); else add(f.l, v);
+  }); });
+  add("Laws infringed", (s.laws || []).map(c => `Law ${c} (${lawText(c)})`));
+  add("Reporting official's role", s.officials?.[s.reporter]?.role);
+  return L.join("\n");
+}
+const AI_RULES = `Hard rules:
+1. Use ONLY facts contained in the input. Never add, infer or embellish any fact, name, time, distance, injury, quotation, motive or law number. If something a disciplinary panel would need is missing (position and distance, sequence, point of contact, force, words spoken), put a bracketed placeholder such as [state your distance from the incident] instead of inventing it.
+2. Keep any quoted words exactly as given, in quotation marks.
+3. Write in the first person, past tense, formal, neutral plain English with no emotive or loaded words. Separate what the referee SAW from the referee's OPINION and label opinion "In my opinion".
+4. Refer to people only by the tokens supplied (for example [PLAYER], [OPPONENT], [REFEREE]), written exactly as supplied; they are replaced afterwards.
+5. Make clear who did what, when (match minute) and where. State the law applied only as given in the input.
+6. Do not recommend or predict a sanction. Do not mention AI or these instructions.`;
+const AI_WRITE = `You draft a formal match-official report for a rugby union club disciplinary hearing, from the referee's own structured answers and notes.
+${AI_RULES}
+Use exactly these headings, each on its own line followed by a paragraph, in this order (leave out a heading only if the input has nothing for it): Position and view / Sequence of events / Decision and law applied / Player's response and conduct / Outcome and procedure followed.
+Output only the report. Then output a line containing exactly ---QUESTIONS--- followed by a short bullet list of important missing details the referee should confirm, or the word None.`;
+const AI_AMEND = `You amend a referee's draft report for a rugby union club disciplinary hearing. Apply ONLY the referee's instruction and keep everything else. Keep the same headings.
+${AI_RULES}
+Output the full amended report, then a line containing exactly ---QUESTIONS--- followed by a short bullet list of important missing details, or the word None.`;
+/* AI plug-in: set aiPlugin in config.js to use any other service. It receives {system,user,settings,model} and returns the text. */
+async function callAI(system, user) {
+  const c = aiCfg();
+  if (typeof CFG.aiPlugin === "function") return await CFG.aiPlugin({ system, user, settings: c, model: c.model });
+  if (!c.key && c.endpoint === DEFAULT_EP) throw new Error("NOKEY");
+  const headers = { "content-type": "application/json", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }; if (c.key) headers["x-api-key"] = c.key;
+  const r = await fetch(c.endpoint, { method: "POST", headers, body: JSON.stringify({ model: c.model, max_tokens: 2500, system, messages: [{ role: "user", content: user }] }) });
+  const j = await r.json(); if (!r.ok) throw new Error(j?.error?.message || r.statusText);
+  return (j.content || []).map(x => x.text || "").join("");
+}
+function draftFromAnswers(s) {
+  const m = s.match || {}, p = s.player || {}, i = s.inc || {}, d = s.dec || {}, role = lc(s.officials?.[s.reporter]?.role || "referee"), sec = [];
+  const H = (t, b) => `${t}\n${b.filter(Boolean).join(" ")}`;
+  sec.push(H("Position and view", [`I was the ${role} for the ${m.competition || "[competition]"} match (${m.grade || "[grade]"}) between ${m.home || "[home team]"} and ${m.away || "[visiting team]"} at ${m.venue || "[venue]"} on ${fmtDate(m.date)}.`, `At ${m.elapsed ?? "[minute]"} minutes of the ${lc(m.period) || "[period]"}, I was positioned [state where you were and how far from the incident], with [describe your view].`]));
+  if (s.type === "blue") {
+    const b = s.bc || [];
+    sec.push(H("Sequence of events", [`I saw ${p.name || "[player]"} of ${p.team || "[team]"} [describe how the head impact or event happened and what you saw].`, (b.signs || []).length ? `The signs I observed were: ${b.signs.map(lc).join("; ")}.` : "", b.mechanism ? `Immediately before this: ${b.mechanism}` : ""]));
+    sec.push(H("Decision and law applied", [`I stopped play${b.removed != null ? " and the player left the field at " + b.removed + " minutes" : ""}. Under Law 3.24 (Recognise and Remove) the player was permanently removed.`, b.medical && b.medical !== "None present" ? `A ${lc(b.medical)}${b.medName ? " (" + b.medName + ")" : ""} attended.` : "No medical person was present.", b.confirmed ? `Confirmation by the medical team at the field (club rule 2.1.8): ${lc(b.confirmed)}.` : ""]));
+    sec.push(H("Outcome and procedure followed", [b.advised === "Yes" ? "The player and team were told the player may not return to play and must follow the concussion protocol." : "", b.frontRow === "Yes" ? `The player was a front-row player; a replacement front-row player was ${b.frontReplacement === "Yes" ? "" : "not "}available.` : "", b.foul === "Yes" ? "Foul play was involved; see the related card report." : ""]));
+    return sec.join("\n\n");
+  }
+  if (s.type === "abandoned") {
+    const a = s.ab || {};
+    sec.push(H("Sequence of events", [`[Describe in order the events leading to my decision.]`, a.persons ? `Persons involved: ${a.persons}` : ""]));
+    sec.push(H("Decision and law applied", [`At ${a.time ?? "[minute]"} minutes I blew the match off because of ${lc(a.reason) || "[reason]"}.`, a.score ? `The score was ${a.score}.` : ""]));
+    sec.push(H("Outcome and procedure followed", [a.informed || "[state who was informed and when]"]));
+    return sec.join("\n\n");
+  }
+  const contact = []; if (i.bodyPart) contact.push(`with the ${lc(i.bodyPart)}`); if (i.contact) contact.push(`to the ${lc(i.contact)}`);
+  sec.push(H("Sequence of events", [`I saw ${p.name || "[person]"} (${isOfficial(s) ? "team official" : `number ${p.number || "[no.]"}, ${posName(p.position) || "[position]"}`}, ${p.team || "[team]"})${i.phase ? " in the " + lc(i.phase) : ""}${i.zone ? ", " + lc(i.zone) : ""}: [describe the action in order, step by step].`, contact.length || i.vName ? `The contact was made ${contact.join(" ") || "[describe the contact]"}${i.vName ? " on " + i.vName + (i.vNumber ? " (number " + i.vNumber + ")" : "") : ""}. [Describe the force and the opponent's position.]` : "", s.dc?.headContact ? `Head or neck contact: ${lc(s.dc.headContact)}.${s.dc.arms ? " Tackler's arms: " + lc(s.dc.arms) + "." : ""}${s.dc.carrierHeight ? " Ball-carrier: " + lc(s.dc.carrierHeight) + "." : ""}` : "", i.injury ? `Result: ${lc(i.injury)}.` : ""]));
+  const laws = (s.laws || []).map(c => `Law ${c} (${lawText(c)})`).join("; ");
+  sec.push(H("Decision and law applied", [`I ${i.advantage && /advantage played/i.test(i.advantage) ? "played advantage, then " : ""}stopped play and showed a ${s.type} card at ${d.cardTime ?? m.elapsed ?? "[minute]"} minutes for ${laws || "[law]"}.`, i.restart ? `Sanction: ${i.restart}` : "", i.assessment ? `In my opinion at the time the action was ${lc(i.assessment)}, because [give your reasons].` : ""]));
+  sec.push(H("Player's response and conduct", [i.response ? `The player's response was: ${i.response}` : "[state the player's response, with the exact words]", d.captain === "Yes" ? `I spoke to the captain: ${d.captainNotes || "[what was said, and when]"}` : ""]));
+  const y = s.yc || {}, rcd = s.rc || {}, fr = s.type === "yellow" ? y : rcd;
+  sec.push(H("Outcome and procedure followed", [s.type === "yellow" ? `The player was suspended for 10 minutes of playing time and was eligible to return at ${y.eligible ?? "[minute]"} minutes.` : `The player left the playing area${rcd.left && rcd.left !== "Yes" ? " (" + lc(rcd.left) + ")" : ""} and took no further part in the match; a sent-off player may not be replaced.`, fr.frontRow === "Yes" ? `A front-row player was affected; a replacement front-row player was ${fr.frontReplacement === "Yes" ? "" : "not "}available${fr.uncontested === "Yes" ? ", and uncontested scrums were ordered" : ""}.` : ""]));
+  return sec.join("\n\n");
+}
+function wordingCheck(t) {
+  const msgs = [], w = t.match(/\b(clearly|obviously|deliberately|thug|dirty|disgraceful|ridiculous|always|never|typical|malicious|animal|scandalous)\b/gi);
+  if (w) msgs.push(`Loaded or conclusion words: “${[...new Set(w.map(lc))].join("”, “")}”. State what you saw; keep opinion in “In my opinion…” with reasons.`);
+  if (!/\bI\b/.test(t)) msgs.push("Write in the first person (“I saw…”, “I stopped play…”).");
+  if (!/\d/.test(t)) msgs.push("Add numbers: distance from the incident, match minute, number of players involved.");
+  if (/\[[^\]]+\]/.test(t)) msgs.push("Replace every [bracketed prompt] with what you actually saw, or delete it.");
+  if (/\b(someone said|i was told|apparently|people say|i heard that)\b/i.test(t)) msgs.push("Separate what you saw yourself from what you were told, and say who told you.");
+  if (!/\b(position|positioned|stood|standing|metres|meters|m away|behind|alongside)\b/i.test(t)) msgs.push("Say where you were positioned and your view of the incident.");
+  if (!/["“‘]/.test(t) && /\b(said|shouted|called|swore)\b/i.test(t)) msgs.push("Put any words spoken in quotation marks, exactly as said.");
+  if (t.trim().length < 600) msgs.push("The report is short; a hearing panel expects a complete, chronological account.");
+  return msgs;
+}
+function aiOut(html) { const e = $("#aiout"); if (e) e.innerHTML = html; }
+function refreshPreview() { const pv = $("#preview"); if (pv && R) pv.innerHTML = docHTML(R); }
+function setNarrative(text, ai, meta) {
+  R.narrative = text; R.aiAssisted = !!ai; if (ai) R.aiMeta = meta || R.aiMeta; if (!ai) delete R.aiMeta;
+  const ta = $('[data-p="narrative"]'); if (ta) ta.value = text; afterChange(); refreshPreview();
+}
+function showAIResult(out) {
+  const [body, qs] = out.split("---QUESTIONS---"), c = aiCfg();
+  setNarrative(unmask((body || "").trim(), R), true, { at: new Date().toISOString(), model: c.model });
+  const q = (qs || "").trim();
+  aiOut(`<div class="note warn"><b>AI-written draft – you must check it.</b> Read every line and compare it with what you saw. Edit the text above or ask the AI to amend it. Fix any [bracketed] prompt.</div>${q && !/^\W*none\W*$/i.test(q) ? `<div class="note"><b>Details the AI says are missing – add them to your notes or the text:</b><div class="aitext">${esc(q)}</div></div>` : ""}`);
+}
+async function aiAction(kind) {
+  if (kind === "settings") return aiSettings();
+  const ta = $('[data-p="narrative"]'), narr = () => (ta?.value || "").trim(), notes = (R.inc?.description || "").trim();
+  if (kind === "check") { const t = narr(); if (!t) { aiOut('<div class="note warn">There is no report text to check yet.</div>'); return; } const m = wordingCheck(t); aiOut(m.length ? `<div class="note warn"><b>Wording check</b><ul>${m.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : '<div class="note">No wording issues found. You still need to read and check it yourself.</div>'); return; }
+  if (kind === "draft" || kind === "usenotes") {
+    if (narr() && !confirm("Replace the current report text?")) return;
+    if (kind === "usenotes" && !notes) { aiOut('<div class="note warn">Your notes are empty. Fill in “Your account” on the Incident step first.</div>'); return; }
+    setNarrative(kind === "draft" ? draftFromAnswers(R) : notes, false);
+    aiOut(`<div class="note warn">${kind === "draft" ? "A draft was built from your answers without AI. Replace each [bracketed prompt] with what you saw." : "Your notes are now the report text."} Check every line.</div>`); return;
+  }
+  const busy = msg => aiOut(`<div class="note">${msg}</div>`); const m = maskMap(R);
+  try {
+    if (kind === "write") {
+      if (notes.length < 40) { aiOut('<div class="note warn">Write your own account first (“Your account” on the Incident step), then the AI can turn it into the formal report.</div>'); return; }
+      if (narr() && !confirm("The AI will replace the current report text. Continue?")) return;
+      busy("The AI is writing your report from your answers and notes…");
+      showAIResult(await callAI(AI_WRITE, `Context facts:\n${factsText(R, m)}\n\nReferee's own notes:\n${mask(notes, m)}`));
+    } else if (kind === "amend") {
+      const ins = ($("#aiInstr")?.value || "").trim(); if (!narr()) { aiOut('<div class="note warn">Write or build the report text first.</div>'); return; } if (!ins) { aiOut('<div class="note warn">Type what you want changed first.</div>'); return; }
+      busy("The AI is amending your report…");
+      showAIResult(await callAI(AI_AMEND, `Current report:\n${mask(narr(), m)}\n\nReferee's instruction:\n${mask(ins, m)}`));
+      const i2 = $("#aiInstr"); if (i2) i2.value = "";
+    }
+  } catch (e) {
+    if (e.message === "NOKEY") { aiSettings(); aiOut('<div class="note warn">Enter an AI key in AI settings first (or use “Build a draft”, which needs no AI).</div>'); return; }
+    aiOut(`<div class="note warn">The AI could not be reached: ${esc(e.message)}. Check AI settings. Your text is unchanged; “Build a draft” works without AI.</div>`);
+  }
+}
+function reportHTML(s) {
+  const bad = empty(s.narrative) || /\[[^\]]+\]/.test(s.narrative || ""), err = showErrors && bad;
+  return `<div class="note warn"><b>You must check this before you sign or download.</b> The AI only rewords what you entered, but it can still make mistakes. You are responsible for every line. Read the report text and the full preview below, and correct anything that is wrong or that you cannot confirm.</div>
+  <div class="f full${err ? " err" : ""}" data-anchor="narrative"><label for="f_narr">Report text <span class="req" aria-hidden="true">*</span></label>
+   <div class="hint">This becomes the narrative of your report. Your answers and notes from the earlier steps are used; names are masked before anything is sent to the AI.</div>
+   <div class="row aibtns noprint"><button type="button" class="btn primary small" data-ai="write">✨ Write my report with AI</button><button type="button" class="btn small" data-ai="draft">Build a draft (no AI)</button><button type="button" class="btn small" data-ai="usenotes">Use my notes as written</button><button type="button" class="btn small" data-ai="check">Check wording</button><button type="button" class="btn small" data-ai="settings">AI settings</button></div>
+   <textarea id="f_narr" data-p="narrative" rows="16">${esc(s.narrative || "")}</textarea>
+   <div class="row noprint"><input type="text" id="aiInstr" style="flex:1 1 260px;width:auto" placeholder="Tell the AI what to change, e.g. “shorter”, “add that I warned the captain at 15 minutes”" aria-label="Instruction for the AI"><button type="button" class="btn small" data-ai="amend">Amend with AI</button></div>
+   <div id="aiout" role="status"></div>${err ? '<div class="errmsg">The report text is required and must not contain [bracketed prompts].</div>' : ""}</div>
+  <h3>Preview of your report</h3><p class="hint">This is what will be produced. Scroll through all of it and check it.</p><div class="previewbox" id="preview">${docHTML(s)}</div>`;
+}
+function aiSettings() {
+  const c = aiCfg();
+  confirmBox("AI settings", "The AI receives your answers and notes with <b>names masked</b> ([PLAYER], [REFEREE] …). Free-text notes may still contain other personal details, so keep notes factual. Your key is stored in this browser only.", "Save", () => {
+    const o = { key: $("#aikey").value.trim(), endpoint: $("#aiend").value.trim() }; try { localStorage.setItem(AIK, JSON.stringify(o)); } catch (e) { }
+    aiOut('<div class="note">AI settings saved on this device.</div>');
+  }, `<div class="f"><label for="aikey">Anthropic API key</label><input id="aikey" type="password" value="${esc(c.key)}" autocomplete="off" placeholder="sk-ant-…"><div class="hint">Use a key with a low spending limit; anyone using this device could read it. Your union can instead set a service address (proxy) so referees need no key, or install a different AI plug-in in config.js.</div></div><div class="f"><label for="aiend">Service address (optional)</label><input id="aiend" type="text" value="${esc(c.endpoint)}"></div>`);
+}
+
+/* signature */
+function initSig() {
+  const c = $("#sig"); if (!c) return;
+  const dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+  c.width = w * dpr; c.height = h * dpr; const g = c.getContext("2d"); g.scale(dpr, dpr); g.lineWidth = 2.2; g.lineCap = "round"; g.strokeStyle = "#111";
+  if (R.decl?.sig) { const im = new Image(); im.onload = () => g.drawImage(im, 0, 0, w, h); im.src = R.decl.sig; }
+  let down = false, dirty = false;
+  const pt = e => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  c.onpointerdown = e => { down = true; c.setPointerCapture(e.pointerId); const [x, y] = pt(e); g.beginPath(); g.moveTo(x, y); g.lineTo(x + .1, y + .1); g.stroke(); dirty = true; };
+  c.onpointermove = e => { if (!down) return; const [x, y] = pt(e); g.lineTo(x, y); g.stroke(); };
+  const end = () => { if (!down) return; down = false; R.decl = R.decl || {}; R.decl.sig = c.toDataURL("image/png"); afterChange2(); };
+  c.onpointerup = end; c.onpointercancel = end;
+  $("#sigClear").onclick = () => { g.clearRect(0, 0, w, h); R.decl = R.decl || {}; R.decl.sig = ""; afterChange2(); };
+}
+function afterChange2() { schedule(); refreshPreview(); $("#side").innerHTML = sideHTML(R); wireSide(); const sn = $(".steps"); if (sn) sn.outerHTML = stepperHTML(R); }
+
+/* ---------- finalise ---------- */
+function confirmBox(title, text, okLabel, onOk, extra = "") {
+  const m = document.createElement("div"); m.className = "modal"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true");
+  m.innerHTML = `<div><h2>${esc(title)}</h2><p>${text}</p>${extra}<div class="row" style="margin-top:14px"><button class="btn" data-x>Cancel</button><span class="spacer"></span><button class="btn primary" data-ok>${esc(okLabel)}</button></div></div>`;
+  document.body.append(m); $("[data-ok]", m).focus();
+  m.onclick = e => { if (e.target === m || e.target.dataset.x != null) m.remove(); };
+  $("[data-ok]", m).onclick = async () => { await onOk(m); m.remove(); };
+  m.onkeydown = e => { if (e.key === "Escape") m.remove(); };
+}
+function tryFinalise() {
+  const items = check(R), req = items.filter(i => i.level === "req"), rec = items.filter(i => i.level === "rec");
+  if (req.length) { showErrors = true; const order = STEPS.map(x => x.id), ks = req.map(i => stepForAnchor(i.anchor)).filter(Boolean).sort((x, y) => order.indexOf(x) - order.indexOf(y)); if (ks[0]) stepId = ks[0]; paint(); window.scrollTo(0, 0); const first = $(".f.err,.errmsg"); first && first.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+  const extra = rec.length ? `<div class="note warn"><b>${rec.length} recommended item${rec.length > 1 ? "s" : ""} not completed:</b><br>${rec.map(i => "• " + esc(i.label)).join("<br>")}<br>Completed detail makes a report harder to challenge.</div>` : "";
+  confirmBox("Finalise and lock this report?", "You confirmed that you have checked the full report. Once finalised it <b>cannot be edited</b>; you can only add dated addenda. The time is recorded and a SHA-256 fingerprint is stored with it.", "Finalise report", async () => {
+    R.status = "final"; R.finalisedAt = new Date().toISOString(); R.decl.signedAt = R.finalisedAt; R.decl.checkedAt = R.finalisedAt; R.decl.userAgent = navigator.userAgent.slice(0, 120);
+    R.addenda = []; R.hash = await hashReport(R); R.updatedAt = R.finalisedAt;
+    store.put(R); location.hash = "#/view/" + R.id;
+  }, extra);
+}
+
+/* ---------- report document ---------- */
+const row = (k, v) => `<tr><th>${esc(k)}</th><td>${v === "" || v == null ? "—" : esc(v)}</td></tr>`;
+const HEADINGS = ["Position and view", "Sequence of events", "Decision and law applied", "Player's response and conduct", "Outcome and procedure followed"];
+const narrHTML = t => String(t || "").split("\n").map(l => HEADINGS.includes(l.trim()) ? `<b>${esc(l.trim())}</b>` : esc(l)).join("\n");
+function docHTML(r) {
+  const T = TYPES[r.type], m = r.match, p = r.player || {}, i = r.inc || {}, d = r.dec || {}, o = r.officials[r.reporter] || {};
+  const colour = { yellow: "#f4c20d", red: "#d62828", blue: "#1f6fd1", abandoned: "#999" }[r.type];
+  const lawsTxt = (r.laws || []).map((c, n) => { const it = LAWS.flatMap(g => g.items).find(x => x[0] === c); return `<tr><td style="width:80px"><b>${n ? "" : "Primary "}${c}</b></td><td>${esc(it ? it[1] : "")}</td></tr>`; }).join("");
+  let h = `<article class="doc t-${r.type}" id="docroot">
+  <div class="hd"><div><div style="font-size:12px;text-transform:uppercase;letter-spacing:.06em">${esc(CFG.orgFull)} (${esc(CFG.orgName)})</div><h1><span class="big" style="background:${colour}"></span>Referee / Assistant Referee report</h1><div style="margin-top:4px"><b>${esc(T.long)}</b></div></div>
+   <div style="text-align:right"><div><b>Report no.</b><br><span class="hash">${esc(r.id)}</span></div>${r.status === "final" ? "" : '<div class="draftmark" style="margin-top:6px">DRAFT – NOT FINALISED</div>'}</div></div>
+  <section><h2>Match</h2><table>${row("Competition", m.competition)}${row("Team played", m.grade)}${row("Home team", m.home)}${row("Visiting team", m.away)}${row("Venue", m.venue)}${row("Date of match", fmtDate(m.date))}${row("Kick-off", m.kickoff)}${row("Period / elapsed time", `${m.period || "—"} · ${m.elapsed ?? "—"} min${m.timeSource ? " (" + m.timeSource + ")" : ""}`)}${row("Score at the time", m.scoreHome != null && m.scoreAway != null ? `${m.home} ${m.scoreHome} – ${m.scoreAway} ${m.away}` : "")}${row("Conditions", m.conditions)}</table></section>`;
+  if (r.type !== "abandoned") {
+    h += `<section><h2>Player</h2><table>${row("Full name", p.name)}${row("Team", p.team)}${row("Playing number", p.number)}${row("Position", p.position)}${row("Captain", p.captain)}${row("Earlier card in this match", p.prior === "Yellow card" ? `Yellow card at ${p.priorTime} min` : p.prior)}</table></section>
+    <section><h2>Law infringement</h2><table>${lawsTxt}</table></section>
+    <section><h2>Incident particulars</h2><table>${row("Phase of play", i.phase)}${row("Location", i.zone)}${row("Advantage", i.advantage)}${row("Sanction / restart", i.restart)}${row("Offender's body part", i.bodyPart)}${row("Referee's assessment", i.assessment)}${r.type !== "blue" ? row("Opponent affected", [i.vName, i.vNumber ? "#" + i.vNumber : ""].filter(Boolean).join(" ")) + row("Part of opponent contacted", i.contact) + row("Injury to opponent", i.injury) : ""}</table></section>`;
+  }
+  const hasDc = r.type !== "blue" && r.type !== "abandoned" && hasLaw(r, ...TACKLE, "9.20.b") && Object.values(r.dc || {}).some(Boolean);
+  if (hasDc) h += `<section><h2>Dangerous contact – observed facts</h2><table>${row("Head / neck contact", r.dc.headContact)}${row("First contact", r.dc.firstContact)}${row("Tackler's arms", r.dc.arms)}${row("Tackler's position", r.dc.tacklerHeight)}${row("Ball-carrier's position", r.dc.carrierHeight)}${row("Force", r.dc.force)}${row("Open-field play", r.dc.open)}</table></section>`;
+  const narr = r.narrative || i.description || "";
+  h += `<section><h2>Report of the ${r.type === "abandoned" ? "match official" : "incident"}</h2><div class="narr">${narrHTML(narr)}</div>${r.aiAssisted ? `<div class="foot"><b>AI-assisted drafting:</b> the wording of this report was drafted by an AI writing tool${r.aiMeta?.model ? " (" + esc(r.aiMeta.model) + ")" : ""}${r.aiMeta?.at ? " on " + esc(fmtDT(r.aiMeta.at)) : ""} from the reporting official's own answers and notes. Personal names were masked before sending. The official previewed, edited where needed, and confirmed the final text as accurate before signing. The original notes are reproduced in the appendix.</div>` : ""}`;
+  if (r.type !== "abandoned") h += `<table style="margin-top:8px">${row("Mitigating factors", i.mitigating)}${row("Aggravating factors", i.aggravating)}${row("Player's response / words", i.response)}${row("Earlier warnings / cautions", i.warnings)}</table>`;
+  h += `</section><section><h2>Decision and process</h2><table>${row("Detected / referred by", d.detected)}${row("Time card shown", d.cardTime != null ? d.cardTime + " min" : "")}${row("TMO review", d.tmo === "Yes" ? "Yes – " + (d.tmoOutcome || "") : d.tmo)}${row("(a) Individual caution", d.individual)}${row("(b) General caution", d.general)}${row("Captain spoken to", d.captain === "Yes" ? "Yes – " + (d.captainNotes || "") : d.captain)}</table></section>`;
+  if (r.type === "yellow") h += `<section><h2>Yellow card detail</h2><table>${row("Eligible to return at", r.yc.eligible != null ? r.yc.eligible + " min" : "")}${row("Front-row player affected", r.yc.frontRow)}${row("Replacement front-row available", r.yc.frontReplacement)}${row("Uncontested scrums ordered", r.yc.uncontested)}${row("Team finished with 14 players (club rule 4.1)", r.yc.reduced)}${row("Returned correctly / on time", r.yc.returned)}${row("Notes", r.yc.notes)}</table></section>`;
+  if (r.type === "red") h += `<section><h2>Red card detail</h2><table>${row("Basis", r.rc.kind)}${row("Left playing area", r.rc.left)}${row("Further misconduct after card", r.rc.further)}${row("Told a report would follow", r.rc.informed)}${row("Front-row player affected", r.rc.frontRow)}${row("Replacement front-row available", r.rc.frontReplacement)}${row("Uncontested scrums ordered", r.rc.uncontested)}${row("Team finished with 14 players (club rule 4.1)", r.rc.reduced)}${row("Notes", r.rc.notes)}</table><div class="foot">A player sent off may not be replaced (Law 9.30, community rugby).</div></section>`;
+  if (r.type === "blue") h += `<section><h2>Blue card detail – suspected concussion</h2><table>${row("Signs observed", (r.bc.signs || []).join("; "))}${row("How it happened", r.bc.mechanism)}${row("Foul play involved", r.bc.foul + (r.bc.foulRef ? " – related report " + r.bc.foulRef : ""))}${row("Signs identified by", r.bc.by)}${row("Medical person attending", r.bc.medical + (r.bc.medName ? " – " + r.bc.medName : ""))}${row("Confirmed by medical team at the field (club rule 2.1.8)", r.bc.confirmed)}${row("Left the field", r.bc.removed != null ? r.bc.removed + " min" : "")}${row("Replacement", r.bc.replacement)}${row("Front-row player", r.bc.frontRow)}${row("Replacement front-row available", r.bc.frontReplacement)}${row("Eight in scrum, 15 kept (club rule 4.1)", r.bc.eight)}${row("Player's cooperation", r.bc.attitude)}${row("Told not to return and to follow concussion protocol", r.bc.advised)}${row("Notes", r.bc.notes)}</table><div class="foot">Recorded as an observation under Law 3.24 (Recognise and Remove). This is not a medical diagnosis.</div></section>`;
+  if (r.type === "abandoned") h += `<section><h2>Match blown off</h2><table>${row("Reason", r.ab.reason)}${row("Time abandoned", r.ab.time != null ? r.ab.time + " min" : "")}${row("Score", r.ab.score)}${row("Persons involved", r.ab.persons)}${row("Who was informed and when", r.ab.informed)}</table></section>`;
+  h += `<section><h2>Evidence and witnesses</h2><table>${row("Video evidence", r.ev.video)}${row("Held by / details", r.ev.videoDetail)}${row("Other witnesses", r.ev.witnesses)}${row("Other information", r.ev.other)}</table></section>
+  <section><h2>Match officials</h2><table><tr><th style="width:auto">Role</th><th style="width:auto">Name</th><th style="width:auto">Contact</th><th style="width:auto">E-mail</th></tr>${r.officials.map((x, n) => `<tr><td>${esc(x.role)}${n === r.reporter ? " <b>(reporting)</b>" : ""}</td><td>${esc(x.name || "—")}</td><td>${esc(x.phone || "—")}</td><td>${esc(x.email || "—")}</td></tr>`).join("")}</table>${r.society ? `<div class="foot">Society / association: ${esc(r.society)}</div>` : ""}</section>
+  <section><h2>Declaration</h2><p>I declare that this report is a true and accurate account of what I personally saw, heard and did, made as soon as practicable after the match, and that I understand it may be used in disciplinary proceedings.</p>
+   <table>${row("Reporting official", `${o.name || ""} (${o.role || ""})`)}${row("Typed name", r.decl.typed)}${row("Report checked by the official before signing", r.decl.checked ? "Yes – the official confirmed they had read the full report and checked every statement" : "No")}<tr><th>Signature</th><td>${r.decl.sig ? `<img class="sig" alt="Signature" src="${r.decl.sig}">` : "—"}</td></tr>${row("Report started", fmtDT(r.createdAt))}${row("Finalised / signed", r.status === "final" ? fmtDT(r.finalisedAt) : "Not finalised")}</table></section>`;
+  if ((r.addenda || []).length) h += `<section><h2>Addenda (added after finalisation)</h2>${r.addenda.map((a, n) => `<table style="margin-bottom:8px">${row("Addendum " + (n + 1) + " – added", fmtDT(a.at))}<tr><th>Text</th><td style="white-space:pre-wrap">${esc(a.text)}</td></tr><tr><th>Seal</th><td class="hash">${esc(a.hash)}</td></tr></table>`).join("")}</section>`;
+  if (r.aiAssisted && i.description) h += `<section><h2>Appendix – reporting official's original notes (as entered)</h2><div class="narr">${esc(i.description)}</div></section>`;
+  h += `<section><h2>Integrity</h2><table><tr><th>SHA-256 of report content</th><td class="hash">${esc(r.hash || "Not yet sealed (draft)")}</td></tr></table><div class="foot">The fingerprint is calculated over the content above at the moment of finalisation; any later change to the original content produces a different value. ${esc(CFG.privacyNote)}<br>Laws reference: ${esc(CFG.lawsEdition)}.</div></section></article>`;
+  return h;
+}
+async function verify(r) {
+  if (r.status !== "final") return { ok: false, msg: "Draft – not sealed." };
+  const h = await hashReport(r); if (h === "unavailable") return { ok: false, msg: "This browser cannot calculate SHA-256 here (needs https or localhost)." };
+  if (h !== r.hash) return { ok: false, msg: "MISMATCH – the stored content no longer matches its fingerprint." };
+  let prev = r.hash;
+  for (const a of r.addenda || []) { const x = await sha(prev + "|" + a.at + "|" + a.text); if (x !== a.hash) return { ok: false, msg: "MISMATCH in addenda chain." }; prev = x; }
+  return { ok: true, msg: "Verified – content matches the SHA-256 fingerprint recorded at signing." };
+}
+function checkThen(fn) {
+  confirmBox("Have you checked this report?", "Please read the whole report on screen before you download, print or send it. Check every name, minute, law and statement against what you saw and did. AI-written wording is only a draft: you are responsible for it.", "Yes, I have checked it", fn);
+}
+function viewReport(id) {
+  const r = store.get(id); if (!r) return notFound();
+  const app = $("#app");
+  app.innerHTML = `<div class="row noprint" style="margin:16px 0"><a class="btn" href="#/dashboard">← Dashboard</a><span class="spacer"></span>
+   ${r.status === "draft" ? `<a class="btn primary" href="#/edit/${esc(r.id)}">Continue editing</a>` : ""}
+   <button class="btn primary" id="print">Print / save as PDF</button><button class="btn" id="json">Download JSON</button>${CFG.disciplineEmail && r.status === "final" ? '<button class="btn" id="mail">E-mail to union</button>' : ""}
+   ${r.status === "final" ? '<button class="btn" id="verify">Verify integrity</button><button class="btn" id="addendum">Add addendum</button>' : ""}<button class="btn danger" id="del">Delete</button></div>
+   <div class="note warn noprint"><b>Check before you download, print or send.</b> Read the report below from top to bottom and check every detail against what you saw. ${r.status === "final" ? "If anything is wrong, add an addendum – the signed original cannot be changed." : "If anything is wrong, choose Continue editing."}</div>${r.status === "final" ? '<div class="note noprint">Club rule 2.1.6: complete this card report before you verify the score on Footprint. Send the PDF and the JSON file to the Union.</div>' : ""}
+   <div class="noprint" id="vmsg" role="status" style="margin-bottom:10px"></div>${docHTML(r)}`;
+  document.title = `${r.id} – ${CFG.appTitle}`;
+  $("#print").onclick = () => checkThen(() => window.print());
+  $("#json").onclick = () => checkThen(() => download(r.id + ".json", JSON.stringify(r, null, 2), "application/json"));
+  const mail = $("#mail"); if (mail) mail.onclick = () => checkThen(() => { const s = encodeURIComponent(`${TYPES[r.type].name} report ${r.id} – ${r.player?.name || r.match.competition}`); const b = encodeURIComponent(`Please find my signed ${TYPES[r.type].name.toLowerCase()} report ${r.id}.\nMatch: ${r.match.home} v ${r.match.away}, ${fmtDate(r.match.date)}.\nSHA-256: ${r.hash}\n\nI have attached the PDF and the JSON file.\n${r.officials[r.reporter].name}`); location.href = `mailto:${CFG.disciplineEmail}?subject=${s}&body=${b}`; });
+  const v = $("#verify"); if (v) v.onclick = async () => { const x = await verify(r); $("#vmsg").innerHTML = `<div class="note ${x.ok ? "" : "warn"}"><b>${x.ok ? "✓" : "✗"}</b> ${esc(x.msg)}</div>`; };
+  $("#del").onclick = () => confirmBox("Delete this report?", r.status === "final" ? "This is a <b>finalised, signed</b> report. Download the JSON first if you need a copy. This removes it from this device only." : "The draft will be removed from this device.", "Delete", () => { store.del(r.id); location.hash = "#/dashboard"; });
+  const ad = $("#addendum"); if (ad) ad.onclick = () => confirmBox("Add addendum", "An addendum is added after the original and shown separately. The original stays unchanged and sealed.", "Add addendum", async () => {
+    const t = ($("#adtxt")?.value || "").trim(); if (!t) return; const at = new Date().toISOString(); const prev = (r.addenda || []).length ? r.addenda.at(-1).hash : r.hash;
+    r.addenda = r.addenda || []; r.addenda.push({ at, text: t, hash: await sha(prev + "|" + at + "|" + t) }); store.put(r); viewReport(id);
+  }, '<div class="f"><label for="adtxt">Addendum text</label><textarea id="adtxt" rows="5"></textarea></div>');
+}
+
+/* ---------- dashboard ---------- */
+let filt = { q: "", type: "", team: "", comp: "" };
+function dashboard() {
+  const all = Object.values(store.all()).sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  const app = $("#app");
+  const n = t => all.filter(r => r.type === t).length;
+  const teams = [...new Set(all.map(r => r.player?.team).filter(Boolean))].sort(), comps = [...new Set(all.map(r => r.match?.competition).filter(Boolean))].sort();
+  app.innerHTML = `<div class="row"><div><h1>Dashboard</h1><p class="sub">Card reports stored on this device. Import files from other referees to combine them.</p></div><span class="spacer"></span>
+    <button class="btn" id="imp">Import JSON</button><button class="btn" id="expAll">Export all (JSON)</button><button class="btn" id="expCsv">Export CSV</button><input type="file" id="file" accept="application/json,.json" multiple hidden></div>
+   <div class="tiles"><div class="tile a"><b>${all.length}</b><span>Total reports</span></div><div class="tile y"><b>${n("yellow")}</b><span>Yellow cards</span></div><div class="tile r"><b>${n("red")}</b><span>Red cards</span></div><div class="tile b"><b>${n("blue")}</b><span>Blue cards</span></div><div class="tile a"><b>${all.filter(r => r.status === "draft").length}</b><span>Drafts</span></div></div>
+   <div id="charts"></div>
+   <div class="card"><h2>Reports</h2><div class="filters"><input type="search" id="q" placeholder="Search name, team, venue, report no." value="${esc(filt.q)}" aria-label="Search">
+     <select id="ft" aria-label="Card type"><option value="">All cards</option>${Object.entries(TYPES).map(([k, v]) => `<option value="${k}" ${filt.type === k ? "selected" : ""}>${v.name}</option>`).join("")}</select>
+     <select id="fc" aria-label="Competition"><option value="">All competitions</option>${comps.map(c => `<option ${filt.comp === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
+     <select id="fm" aria-label="Team"><option value="">All teams</option>${teams.map(c => `<option ${filt.team === c ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></div>
+   <div class="tablewrap" id="tbl"></div></div>`;
+  const draw = () => {
+    const q = filt.q.toLowerCase();
+    const rows = all.filter(r => (!filt.type || r.type === filt.type) && (!filt.team || r.player?.team === filt.team) && (!filt.comp || r.match?.competition === filt.comp) && (!q || JSON.stringify([r.id, r.player?.name, r.player?.team, r.match?.home, r.match?.away, r.match?.venue, r.match?.competition]).toLowerCase().includes(q)));
+    $("#tbl").innerHTML = rows.length ? `<table><thead><tr><th>Date</th><th>Card</th><th>Player</th><th>Match</th><th>Law</th><th>Min</th><th>Status</th><th>Report</th></tr></thead><tbody>${rows.map(r => `<tr class="clickable" tabindex="0" data-id="${esc(r.id)}"><td>${fmtDate(r.match?.date)}</td><td><span class="pill ${r.type}">${esc(TYPES[r.type]?.name)}</span></td><td>${esc(r.player?.name || "—")}<br><span class="hint">${esc(r.player?.team || "")}${r.player?.number ? " #" + esc(r.player.number) : ""}</span></td><td>${esc(r.match?.home)} v ${esc(r.match?.away)}<br><span class="hint">${esc(r.match?.competition || "")}</span></td><td>${esc((r.laws || []).join(", ") || "—")}</td><td>${esc(r.match?.elapsed ?? "—")}</td><td><span class="pill ${r.status}">${r.status === "final" ? "Final" : "Draft"}</span></td><td class="hint">${esc(r.id)}</td></tr>`).join("")}</tbody></table>` : `<div class="empty">${all.length ? "No reports match these filters." : "No reports yet. Start with “+ New card report”."}</div>`;
+    $$("#tbl tr.clickable").forEach(tr => { const go = () => location.hash = (store.get(tr.dataset.id).status === "draft" ? "#/edit/" : "#/view/") + tr.dataset.id; tr.onclick = go; tr.onkeydown = e => { if (e.key === "Enter") go(); }; });
+  };
+  draw();
+  $("#q").oninput = e => { filt.q = e.target.value; draw(); };
+  $("#ft").onchange = e => { filt.type = e.target.value; draw(); }; $("#fc").onchange = e => { filt.comp = e.target.value; draw(); }; $("#fm").onchange = e => { filt.team = e.target.value; draw(); };
+  charts(all);
+  $("#imp").onclick = () => $("#file").click();
+  $("#file").onchange = async e => { let ok = 0, bad = 0; for (const f of e.target.files) { try { const j = JSON.parse(await f.text()); for (const r of (Array.isArray(j) ? j : [j])) { if (!r.id || !r.type || !r.match) { bad++; continue; } if (r.status === "final") { const v = await verify(r); r.importedVerified = v.ok; if (!v.ok && v.msg.startsWith("MISMATCH")) { bad++; continue; } } store.put(r); ok++; } } catch (x) { bad++; } } alert(`Imported ${ok} report(s).${bad ? " " + bad + " skipped (invalid or failed integrity check)." : ""}`); dashboard(); };
+  $("#expAll").onclick = () => download(`card-reports-${today()}.json`, JSON.stringify(all, null, 2), "application/json");
+  $("#expCsv").onclick = () => { const cols = [["Report no.", r => r.id], ["Status", r => r.status], ["Card", r => TYPES[r.type]?.name], ["Date", r => r.match?.date], ["Competition", r => r.match?.competition], ["Home", r => r.match?.home], ["Visitors", r => r.match?.away], ["Venue", r => r.match?.venue], ["Period", r => r.match?.period], ["Minute", r => r.match?.elapsed], ["Player", r => r.player?.name], ["Team", r => r.player?.team], ["Number", r => r.player?.number], ["Position", r => r.player?.position], ["Laws", r => (r.laws || []).join(" ")], ["Assessment", r => r.inc?.assessment], ["Reporting official", r => r.officials?.[r.reporter]?.name], ["Finalised", r => r.finalisedAt], ["SHA-256", r => r.hash]]; const q = v => `"${String(v ?? "").replace(/"/g, '""')}"`; download(`card-reports-${today()}.csv`, [cols.map(c => q(c[0])).join(","), ...all.map(r => cols.map(c => q(c[1](r))).join(","))].join("\n"), "text/csv"); };
+}
+function bars(title, data, max) {
+  const m = max || Math.max(1, ...data.map(d => d[1]));
+  return `<div class="card"><h2>${esc(title)}</h2>${data.length ? `<div class="bars">${data.map(([l, v]) => `<div class="bar-row"><span class="lbl" title="${esc(l)}">${esc(l)}</span><span class="track"><span class="fill" style="display:block;width:${Math.round(100 * v / m)}%"></span></span><b>${v}</b></div>`).join("")}</div>` : '<p class="hint">No data yet.</p>'}</div>`;
+}
+function teamTable(all) {
+  const o = {}; all.filter(r => r.status === "final" || true).forEach(r => { const t = r.player?.team; if (!t || !["red", "yellow", "blue"].includes(r.type)) return; (o[t] = o[t] || { red: 0, yellow: 0, blue: 0 })[r.type]++; });
+  const rows = Object.entries(o).sort((a, b) => b[1].red - a[1].red || b[1].yellow - a[1].yellow).slice(0, 10);
+  return `<div class="card"><h2>Team discipline</h2><p class="hint">Log tie-breaks (competition rule 13): fewest red cards, then fewest yellow cards.</p>${rows.length ? `<table><thead><tr><th>Team</th><th>Red</th><th>Yellow</th><th>Blue</th></tr></thead><tbody>${rows.map(([t, c]) => `<tr><td>${esc(t)}</td><td>${c.red}</td><td>${c.yellow}</td><td>${c.blue}</td></tr>`).join("")}</tbody></table>` : '<p class="hint">No data yet.</p>'}</div>`;
+}
+function charts(all) {
+  const cnt = (f) => { const o = {}; all.forEach(r => { const k = f(r); if (k) o[k] = (o[k] || 0) + 1; }); return Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 8); };
+  const b = [["0–20", 0], ["21–40", 0], ["41–60", 0], ["61–80", 0], ["80+", 0]];
+  all.forEach(r => { const e = r.match?.elapsed; if (e == null) return; b[e <= 20 ? 0 : e <= 40 ? 1 : e <= 60 ? 2 : e <= 80 ? 3 : 4][1]++; });
+  const lc = {}; all.forEach(r => (r.laws || []).forEach(c => lc[c] = (lc[c] || 0) + 1));
+  const lawCounts = Object.entries(lc).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([c, n]) => ["Law " + c, n]);
+  $("#charts").innerHTML = `<div class="grid2">${bars("Cards by match minute", b)}${teamTable(all)}${bars("Most cited laws", lawCounts)}${bars("Cards by competition", cnt(r => r.match?.competition))}</div>`;
+}
+
+function notFound() { $("#app").innerHTML = `<div class="empty"><h1>Report not found</h1><p>It may have been created on a different device or browser. Use Import JSON on the dashboard.</p><a class="btn primary" href="#/dashboard">Dashboard</a></div>`; }
+
+/* ---------- router ---------- */
+function route() {
+  document.title = CFG.appTitle; R = R && R.status === "final" ? null : R;
+  const [, view, id] = (location.hash || "#/dashboard").split("/");
+  $$("[data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === view || (a.dataset.nav === "dashboard" && !["new", "edit"].includes(view))));
+  window.scrollTo(0, 0);
+  if (view === "new") editor("new"); else if (view === "edit") editor(id); else if (view === "view") viewReport(id); else dashboard();
+  $("#app").focus({ preventScroll: true });
+}
+$("#brandText").textContent = CFG.appTitle; $("#footNote").textContent = `${CFG.orgFull}. Reports are stored in this browser only until you export or send them. ${CFG.lawsEdition}.`;
+window.addEventListener("hashchange", route); window.addEventListener("beforeunload", () => persist());
+route();
+})();
+
+</script>
+</body>
+</html>
