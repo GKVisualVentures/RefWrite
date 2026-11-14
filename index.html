@@ -267,7 +267,6 @@ window.CONTACT = ["Head / face","Neck","Shoulder / upper chest","Torso","Hips / 
 window.SIGNS = ["Loss of consciousness / unresponsive","Seizure / convulsion","Lying motionless / slow to get up","Unsteady on feet / balance problem","Grabbing / clutching head","Confused / disorientated","Blank or vacant look","Dazed / slow to respond","Vomiting","Other observed sign"];
 
 window.COMPETITIONS = ["Super League A","Super League B","Super League C","Central Region","Northern Region","Southern Region","Paarl Region","U20B","Reserve","Women","Golden Oldies","Other"];
-window.GRADES = ["1st team","2nd team","3rd team","U20","Not applicable (Women / Reserve / Golden Oldies)"];
 // Club names from the WP Club Rugby Competition Format & Rules 2026 (suggestions only; any name can be typed).
 window.CLUBS = ["Villager","Hamiltons","Durbanville-Bellville","SK Walmers","False Bay","UCT","Van Der Stel-Evergreens","Tygerberg","Union Milnerton","Brackenfell","Stellenbosch","UWC","Helderberg","Primrose","Franschhoek","Kuilsriver",
 "St Georges","Kraaifontein","Belhar","Goodwood","Collegians","Macassar","NTK","Hamlets","Bellville","Vineyards","CPUT","Young Peoples","All Saints","Violets","Hamediehs","Hands & Heart",
@@ -332,20 +331,17 @@ const FRONT = (pre, verb) => [
   P(pre + ".reduced", "Team required to finish the match with 14 players (club rule 4.1)?", "radio", { showIf: s => getP(s, pre + ".uncontested") === "Yes", opts: ["Yes", "No", "Not applicable"] })
 ];
 const isOfficial = s => (s.player?.role || "").startsWith("Team official");
-const halfLen = m => { m = m || {}; const c = (m.competition || "").toLowerCase(), g = m.grade || ""; if (c.includes("women")) return 35; if (c.includes("reserve") || c.includes("golden")) return 30; if (g.startsWith("1st")) return 40; if (g.startsWith("2nd") || g === "U20") return 35; if (g.startsWith("3rd")) return 30; return null; };
 const SECTIONS = [
   { id: "match", title: "1. Details", fields: [
     P("cardtype", "Type of card", "ctype", { full: 1 }),
     P("match.competition", "Competition", "select", { req: 1, opts: window.COMPETITIONS }),
-    P("match.grade", "Team played (grade)", "select", { req: 1, opts: window.GRADES }),
     P("match.home", "Home team", "text", { req: 1, list: () => window.CLUBS }),
     P("match.away", "Visiting team", "text", { req: 1, list: () => window.CLUBS }),
     P("match.venue", "Venue", "text", { req: 1 }),
     P("match.date", "Date of match", "date", { req: 1 }),
     P("match.kickoff", "Kick-off time", "time"),
     P("match.period", "Period of game when incident occurred", "radio", { req: 1, opts: ["1st half", "2nd half", "Extra time"], full: 1 }),
-    P("match.elapsed", "Elapsed time in match (minutes)", "number", { req: 1, min: 0, max: 130, hint: s => { const h = halfLen(s.match); return "Playing time on your watch when the incident happened." + (h ? ` Club rule 15.1: ${h} minutes per half for this team.` : ""); } }),
-    P("match.timeSource", "Source of that time", "select", { opts: ["Referee's watch", "Timekeeper", "Scoreboard", "Estimate"] }),
+    P("match.elapsed", "Elapsed time in match (minutes)", "number", { req: 1, min: 0, max: 130, hint: "Playing time on your watch when the incident happened." }),
     P("match.scoreHome", "Home score at the time", "number", { min: 0 }),
     P("match.scoreAway", "Visitors' score at the time", "number", { min: 0 }),
     P("match.conditions", "Weather / pitch conditions", "text", { hint: "e.g. dry, floodlit, wet and slippery." })
@@ -459,7 +455,7 @@ const isShown = (sec, s) => !sec.show || sec.show(s);
 const fShown = (f, s) => !f.showIf || f.showIf(s);
 const fReq = (f, s) => typeof f.req === "function" ? f.req(s) : !!f.req;
 const fRec = (f, s) => typeof f.rec === "function" ? f.rec(s) : !!f.rec;
-const visSig = s => SECTIONS.map(x => isShown(x, s) ? 1 : 0).join("") + SECTIONS.flatMap(x => x.fields || []).map(f => fShown(f, s) && (fReq(f, s) ? "R" : fRec(f, s) ? "r" : "-")).join("") + (s.laws || []).join(",") + "|" + halfLen(s.match) + "|" + (s.player?.role || "");
+const visSig = s => SECTIONS.map(x => isShown(x, s) ? 1 : 0).join("") + SECTIONS.flatMap(x => x.fields || []).map(f => fShown(f, s) && (fReq(f, s) ? "R" : fRec(f, s) ? "r" : "-")).join("") + (s.laws || []).join(",") + "|" + (s.player?.role || "");
 
 /* completeness: returns [{id,label,level,anchor}] */
 function check(s) {
@@ -476,8 +472,6 @@ function check(s) {
       else if (f.p === "inc.description" && String(v).length < 400) out.push({ level: "rec", label: "Description: aim for a full account (400+ characters)", anchor: f.p });
     });
   });
-  const hl = halfLen(s.match), el = s.match?.elapsed;
-  if (hl && el > 2 * hl + 10) out.push({ level: "rec", label: `Elapsed time (${el} min) is longer than a ${2 * hl}-minute match`, anchor: "match.elapsed" });
   if (empty(s.narrative)) out.push({ level: "req", label: "Report text – use “Write my report with AI”, “Build a draft” or “Use my notes as written”", anchor: "narrative" });
   else if (/\[[^\]]+\]/.test(s.narrative)) out.push({ level: "req", label: "Replace or delete the [bracketed prompts] in the report text", anchor: "narrative" });
   if (!s.decl?.checked) out.push({ level: "req", label: "Confirm you have checked the whole report", anchor: "decl.checked" });
@@ -733,7 +727,7 @@ async function callAI(system, user) {
 function draftFromAnswers(s) {
   const m = s.match || {}, p = s.player || {}, i = s.inc || {}, d = s.dec || {}, role = lc(s.officials?.[s.reporter]?.role || "referee"), sec = [];
   const H = (t, b) => `${t}\n${b.filter(Boolean).join(" ")}`;
-  sec.push(H("Position and view", [`I was the ${role} for the ${m.competition || "[competition]"} match (${m.grade || "[grade]"}) between ${m.home || "[home team]"} and ${m.away || "[visiting team]"} at ${m.venue || "[venue]"} on ${fmtDate(m.date)}.`, `At ${m.elapsed ?? "[minute]"} minutes of the ${lc(m.period) || "[period]"}, I was positioned [state where you were and how far from the incident], with [describe your view].`]));
+  sec.push(H("Position and view", [`I was the ${role} for the ${m.competition || "[competition]"} match between ${m.home || "[home team]"} and ${m.away || "[visiting team]"} at ${m.venue || "[venue]"} on ${fmtDate(m.date)}.`, `At ${m.elapsed ?? "[minute]"} minutes of the ${lc(m.period) || "[period]"}, I was positioned [state where you were and how far from the incident], with [describe your view].`]));
   if (s.type === "blue") {
     const b = s.bc || [];
     sec.push(H("Sequence of events", [`I saw ${p.name || "[player]"} of ${p.team || "[team]"} [describe how the head impact or event happened and what you saw].`, (b.signs || []).length ? `The signs I observed were: ${b.signs.map(lc).join("; ")}.` : "", b.mechanism ? `Immediately before this: ${b.mechanism}` : ""]));
@@ -875,7 +869,7 @@ function docHTML(r) {
   let h = `<article class="doc t-${r.type}" id="docroot">
   <div class="hd"><div><div style="font-size:12px;text-transform:uppercase;letter-spacing:.06em">${esc(CFG.orgFull)} (${esc(CFG.orgName)})</div><h1><span class="big" style="background:${colour}"></span>Referee / Assistant Referee report</h1><div style="margin-top:4px"><b>${esc(T.long)}</b></div></div>
    <div style="text-align:right"><div><b>Report no.</b><br><span class="hash">${esc(r.id)}</span></div>${r.status === "final" ? "" : '<div class="draftmark" style="margin-top:6px">DRAFT – NOT FINALISED</div>'}</div></div>
-  <section><h2>Match</h2><table>${row("Competition", m.competition)}${row("Team played", m.grade)}${row("Home team", m.home)}${row("Visiting team", m.away)}${row("Venue", m.venue)}${row("Date of match", fmtDate(m.date))}${row("Kick-off", m.kickoff)}${row("Period / elapsed time", `${m.period || "—"} · ${m.elapsed ?? "—"} min${m.timeSource ? " (" + m.timeSource + ")" : ""}`)}${row("Score at the time", m.scoreHome != null && m.scoreAway != null ? `${m.home} ${m.scoreHome} – ${m.scoreAway} ${m.away}` : "")}${row("Conditions", m.conditions)}</table></section>`;
+  <section><h2>Match</h2><table>${row("Competition", m.competition)}${row("Home team", m.home)}${row("Visiting team", m.away)}${row("Venue", m.venue)}${row("Date of match", fmtDate(m.date))}${row("Kick-off", m.kickoff)}${row("Period / elapsed time", `${m.period || "—"} · ${m.elapsed ?? "—"} min`)}${row("Score at the time", m.scoreHome != null && m.scoreAway != null ? `${m.home} ${m.scoreHome} – ${m.scoreAway} ${m.away}` : "")}${row("Conditions", m.conditions)}</table></section>`;
   if (r.type !== "abandoned") {
     h += `<section><h2>Player</h2><table>${row("Full name", p.name)}${row("Team", p.team)}${row("Playing number", p.number)}${row("Position", p.position)}${row("Captain", p.captain)}${row("Earlier card in this match", p.prior === "Yellow card" ? `Yellow card at ${p.priorTime} min` : p.prior)}</table></section>
     <section><h2>Law infringement</h2><table>${lawsTxt}</table></section>
