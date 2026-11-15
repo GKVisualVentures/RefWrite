@@ -5,45 +5,79 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>WPRRS Incident Report</title>
 <style>
-  :root{--bg:#f4f6f8;--card:#fff;--ink:#1c2733;--muted:#5d6b7a;--line:#d9e0e7;--accent:#0b5d3b;--accent2:#e8f3ee;--warn:#b42318}
+  /* Brand palette: change the primary colour here if needed */
+  :root{--primary:#005597;--yellow:#fbf072;--green:#6ca003;--red:#d91f28;--pink:#f281c6;--white:#ffffff;
+    --bg:#f2f6fa;--card:var(--white);--ink:#14232f;--muted:#55646f;--line:#d3dde6;
+    --accent:var(--primary);--accent2:#e2ecf6;--warn:var(--red)}
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.4}
-  header{background:var(--accent);color:#fff;padding:18px 16px}
+  header{background:var(--primary);color:var(--white);padding:18px 16px 23px;position:relative}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;
+    background:linear-gradient(90deg,var(--yellow) 0 25%,var(--green) 25% 50%,var(--red) 50% 75%,var(--pink) 75% 100%)}
+  .hd{max-width:860px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
   header h1{margin:0;font-size:1.25rem}
-  header p{margin:4px 0 0;opacity:.85;font-size:.9rem}
+  header p{margin:4px 0 0;opacity:.9;font-size:.85rem;max-width:520px}
+  .nav{display:flex;gap:6px}
+  .nav button{background:rgba(255,255,255,.15);color:#fff;padding:9px 14px}
+  .nav button.on{background:#fff;color:var(--primary)}
   main{max-width:860px;margin:0 auto;padding:16px}
   section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
-  section h2{margin:0 0 12px;font-size:1.05rem;color:var(--accent)}
+  section h2{margin:0 0 12px;font-size:1.05rem;color:var(--primary)}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
   label{display:block;font-size:.85rem;font-weight:600;margin-bottom:4px}
-  input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{
+  input[type=text],input[type=date],input[type=time],input[type=number],input[type=email],input[type=tel],select,textarea{
     width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
   textarea{min-height:110px;resize:vertical}
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:transparent}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--primary);border-color:transparent}
+  input[type=checkbox]{accent-color:var(--primary)}
   .scoreboard{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;background:var(--accent2);padding:14px;border-radius:10px}
   .scoreboard .team input[type=text]{margin-bottom:8px}
   .scoreboard .score input{font-size:1.8rem;text-align:center;font-weight:700;padding:8px}
   .vs{font-weight:700;color:var(--muted);padding-bottom:18px}
-  .tick{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:8px}
+  .tick{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:8px}
   .tick .q{font-weight:600;font-size:.9rem;flex:1 1 180px}
   .tick label.opt{display:flex;align-items:center;gap:6px;margin:0;font-weight:500;cursor:pointer}
-  .tick input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent)}
+  .tick input[type=checkbox]{width:22px;height:22px}
   .stack{display:grid;gap:12px}
   .hidden{display:none}
-  .values{background:#fff8e6;border:1px solid #f0d58a;border-radius:8px;padding:10px 12px}
+  .values{background:#fffde3;border:1px solid var(--yellow);border-radius:8px;padding:10px 12px;box-shadow:inset 4px 0 0 var(--yellow)}
   .values p{margin:0 0 8px;font-size:.85rem;color:var(--muted)}
+  .redbox{background:#fdecec;border:1px solid #eca3a7;border-radius:8px;padding:10px 12px;margin-top:12px;box-shadow:inset 4px 0 0 var(--red)}
+  .redbox p{margin:8px 0 0;font-size:.88rem}
   .vals{display:flex;flex-wrap:wrap;gap:12px}
   .vals label.opt{display:flex;align-items:center;gap:6px;margin:0;font-weight:500}
   .actions{display:flex;gap:10px;flex-wrap:wrap}
   button{padding:12px 18px;border:0;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
-  .primary{background:var(--accent);color:#fff}
+  .primary{background:var(--primary);color:#fff}
+  .primary:hover{background:#00447a}
   .secondary{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .secondary:hover{border-color:var(--primary);color:var(--primary)}
   .danger{background:#fff;border:1px solid var(--warn);color:var(--warn)}
   .status{font-size:.9rem;color:var(--muted);margin-top:10px;min-height:1.2em}
-  .ai-btn{margin-top:12px;background:#1f4fd8;color:#fff}
-  .ai-btn:disabled{background:#aab4c3;cursor:not-allowed}
+  .ai-btn{margin-top:12px;background:var(--yellow);color:var(--ink);border:2px solid var(--primary)}
+  .ai-btn:disabled{background:#e4ebf1;border-color:var(--line);color:#7b8993;cursor:not-allowed}
   .hint{font-size:.85rem;color:var(--muted);margin:8px 0 0}
-  .pv{white-space:pre-wrap;background:#f8fafb;border:1px solid var(--line);border-radius:8px;padding:12px;font:inherit;font-size:.92rem;margin:0}
+
+  /* Law chips */
+  .lawgroup{margin-bottom:10px}
+  .lawgroup h3{font-size:.85rem;margin:0 0 6px;color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  label.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:600;margin:0;cursor:pointer;background:#fff;font-size:.9rem}
+  label.chip:has(input:checked){background:var(--yellow);border-color:var(--primary)}
+
+  /* Officials */
+  .off{border:1px solid var(--line);border-radius:10px;padding:12px}
+  .off h3{margin:0 0 8px;font-size:.95rem;color:var(--primary);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .off .det{display:flex;align-items:center;gap:6px;font-weight:500;font-size:.85rem;margin:0}
+  .sig canvas{width:100%;height:100px;border:1px dashed var(--muted);border-radius:8px;background:#fff;touch-action:none;display:block}
+  .sig .sigbar{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:.8rem;color:var(--muted)}
+  .sig button{padding:4px 10px;font-size:.8rem}
+  .notice{background:var(--accent2);border-radius:8px;padding:12px;font-size:.88rem}
+  .notice p{margin:0 0 8px}
+  .privacy{font-size:.78rem;color:var(--muted);margin-top:14px}
+
+  /* Preview */
+  .pv{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:12px;font:inherit;font-size:.92rem;margin:0}
   .lawrow{display:grid;grid-template-columns:1fr 1.4fr auto;gap:8px;margin-bottom:8px}
   .lawrow button{padding:8px 12px}
   .addlaw{display:flex;gap:8px;margin-top:10px}
@@ -54,38 +88,105 @@
   details.ais{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-bottom:12px}
   details.ais summary{cursor:pointer;font-weight:600;font-size:.9rem}
   details.ais .grid{margin-top:10px}
-  .ldr{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:6px}
-  @keyframes sp{to{transform:rotate(360deg)}}
-  @media(max-width:520px){.lawrow{grid-template-columns:1fr}.addlaw{flex-direction:column}}
-  @media print{.noprint{display:none!important}body.print-preview #f{display:none!important}#pvDesc{min-height:0;border:0;padding:0}}
-  @media(max-width:520px){.scoreboard{grid-template-columns:1fr}.vs{text-align:center;padding:0}}
-  @media print{header p,.actions,.status{display:none}body{background:#fff}section{break-inside:avoid}}
+
+  /* Dashboard */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--primary);border-radius:12px;padding:12px}
+  .card b{display:block;font-size:1.7rem;line-height:1.1}
+  .card span{font-size:.82rem;color:var(--muted)}
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}
+  .dgrid section{margin-bottom:0}
+  .bar{display:grid;grid-template-columns:minmax(90px,40%) 1fr 32px;gap:8px;align-items:center;margin-bottom:7px;font-size:.88rem}
+  .bar .t{background:#edf2f7;border-radius:6px;height:16px;overflow:hidden}
+  .bar .t i{display:block;height:100%;border-radius:6px;background:var(--primary);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+  .bar .n{text-align:right;font-weight:700}
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.86rem}
+  th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:.78rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+  td button{padding:6px 10px;font-size:.82rem;margin-right:4px}
+  .empty{color:var(--muted);padding:8px 0}
+  .dsec{margin-top:16px}
+
+  @media(max-width:520px){.scoreboard{grid-template-columns:1fr}.vs{text-align:center;padding:0}.lawrow{grid-template-columns:1fr}.addlaw{flex-direction:column}.dgrid{grid-template-columns:1fr}}
+  @media print{header p,.actions,.status,.nav{display:none}body{background:#fff}section{break-inside:avoid}
+    .noprint{display:none!important}body.print-preview #f{display:none!important}#pvDesc{min-height:0;border:0;padding:0}}
 </style>
 </head>
 <body>
 <header>
-  <h1>WPRRS Incident Report</h1>
-  <p>Complete each section, then save or print the report.</p>
+  <div class="hd">
+    <div>
+      <h1>WPRRS Incident Report</h1>
+      <p>Referee / Assistant Referee report on temporary suspension, send off or match blown off</p>
+    </div>
+    <nav class="nav noprint">
+      <button type="button" id="navForm" class="on">New report</button>
+      <button type="button" id="navDash">Dashboard</button>
+    </nav>
+  </div>
 </header>
 
 <main>
+<div id="viewForm">
 <form id="f" autocomplete="off">
 
   <section>
-    <h2>1. Match details</h2>
+    <h2>1. Type of report &amp; match details</h2>
     <div class="grid">
-      <div><label for="date">Date</label><input type="date" id="date" name="date"></div>
-      <div><label for="comp">Competition / league</label><input type="text" id="comp" name="comp"></div>
-      <div><label for="venue">Venue</label><input type="text" id="venue" name="venue"></div>
-      <div><label for="ref">Referee</label><input type="text" id="ref" name="ref"></div>
-      <div><label for="rtype">Type of report</label>
-        <select id="rtype" name="rtype"><option value="">Select…</option><option>Yellow card</option><option>Red card</option><option>Match blown off</option><option>Other</option></select></div>
+      <div><label for="rtype">This was a</label>
+        <select id="rtype" name="rtype">
+          <option value="">Select…</option>
+          <option>Temporary suspension (yellow card)</option>
+          <option>Send off (red card)</option>
+          <option>Match blown off</option>
+          <option>Other</option>
+        </select></div>
       <div id="rtypeOther" class="hidden"><label for="rtypeText">Specify other</label><input type="text" id="rtypeText" name="rtypeText"></div>
+      <div><label for="comp">WPRU competition</label>
+        <select id="comp" name="comp">
+          <option value="">Select…</option>
+          <optgroup label="Club leagues">
+            <option>Super League A</option>
+            <option>Super League B</option>
+            <option>Super League C</option>
+            <option>Central League</option>
+            <option>Northern League</option>
+            <option>Southern League</option>
+            <option>Paarl Region</option>
+          </optgroup>
+          <optgroup label="Other divisions">
+            <option>U/20B</option>
+            <option>Reserve</option>
+            <option>Women</option>
+            <option>Golden Oldies</option>
+          </optgroup>
+          <optgroup label="Schools and tournaments">
+            <option>Schools League</option>
+            <option>Tournament</option>
+          </optgroup>
+        </select>
+      </div>
+      <div id="compNameBox" class="hidden"><label for="compName" id="compNameLbl">Name of the schools league</label><input type="text" id="compName" name="compName" placeholder="Type the name"></div>
+      <div><label for="venue">Venue</label><input type="text" id="venue" name="venue"></div>
+      <div><label for="date">Date of match</label><input type="date" id="date" name="date"></div>
+    </div>
+
+    <div id="redBox" class="redbox hidden">
+      <label for="halfLen">Red card return rule (Law 9.30 amendment): length of each half</label>
+      <select id="halfLen" name="halfLen">
+        <option value="">Select…</option>
+        <option value="40">40 minutes per half</option>
+        <option value="35">35 minutes per half</option>
+        <option value="30">30 minutes per half</option>
+        <option value="25">25 minutes per half</option>
+      </select>
+      <p id="redNote"></p>
     </div>
   </section>
 
   <section>
-    <h2>2. Score at time of incident</h2>
+    <h2>2. Teams &amp; score at time of incident</h2>
     <div class="scoreboard">
       <div class="team">
         <label for="home">Home team</label>
@@ -94,37 +195,34 @@
       </div>
       <div class="vs">vs</div>
       <div class="team">
-        <label for="away">Away team</label>
-        <input type="text" id="away" name="away" placeholder="Away team">
+        <label for="away">Visiting team</label>
+        <input type="text" id="away" name="away" placeholder="Visiting team">
         <div class="score"><label for="as">Score</label><input type="number" id="as" name="as" min="0" inputmode="numeric" placeholder="0"></div>
       </div>
-    </div>
-    <div class="grid" style="margin-top:12px">
-      <div><label for="mins">Match time (minute)</label><input type="number" id="mins" name="mins" min="0" max="120" inputmode="numeric"></div>
-      <div><label for="half">Half</label>
-        <select id="half" name="half"><option value="">Select…</option><option>1st half</option><option>2nd half</option><option>Extra time</option></select></div>
     </div>
   </section>
 
   <section>
-    <h2>3. Player &amp; law</h2>
-    <div class="stack">
-      <div class="grid">
-        <div><label for="pname">Player name</label><input type="text" id="pname" name="pname"></div>
-        <div><label for="pnum">Jersey number</label><input type="text" id="pnum" name="pnum" inputmode="numeric"></div>
-        <div><label for="pteam">Team</label>
-          <select id="pteam" name="pteam"><option value="">Select…</option><option value="home">Home</option><option value="away">Away</option></select></div>
-      </div>
+    <h2>3. Player</h2>
+    <div class="grid">
+      <div><label for="pname">Player's full name</label><input type="text" id="pname" name="pname"></div>
+      <div><label for="pteam">Team</label>
+        <select id="pteam" name="pteam"><option value="">Select…</option><option value="home">Home team</option><option value="away">Visiting team</option></select></div>
+      <div><label for="ppos">Playing position</label><input type="text" id="ppos" name="ppos"></div>
+      <div><label for="pnum">Playing number</label><input type="text" id="pnum" name="pnum" inputmode="numeric"></div>
+    </div>
+  </section>
 
+  <section>
+    <h2>4. Law infringement</h2>
+    <p class="hint" style="margin:0 0 10px">Tick the appropriate law infringement(s). More than one can be ticked.</p>
+    <div id="lawChips"></div>
+
+    <div class="stack" style="margin-top:12px">
       <div>
-        <label for="law">Law infringement</label>
+        <label for="law">Other law infringement (not listed above)</label>
         <select id="law" name="law">
-          <option value="">Select…</option>
-          <optgroup label="Law 9 – Foul play">
-            <option>Law 9 – Dangerous tackle</option><option>Law 9 – Head contact</option><option>Law 9 – Striking / punching</option>
-            <option>Law 9 – Tripping</option><option>Law 9 – Dangerous play at ruck / maul</option><option>Law 9 – Obstruction</option>
-            <option>Law 9 – Other foul play</option>
-          </optgroup>
+          <option value="">None</option>
           <optgroup label="Open play">
             <option>Law 7 – Advantage</option>
             <option>Law 10 – Offside and onside in open play</option>
@@ -144,8 +242,6 @@
           <optgroup label="Other laws">
             <option>Law 1 – The ground</option>
             <option>Law 2 – Ball</option>
-            <option>Law 3 – Team (incl. replacements)</option>
-            <option>Law 4 – Permitted clothing</option>
             <option>Law 5 – Time</option>
             <option>Law 6 – Match officials</option>
             <option>Law 8 – Scoring</option>
@@ -168,44 +264,63 @@
           <label class="opt"><input type="checkbox" name="val" value="Respect"> Respect</label>
         </div>
       </div>
-
-      <div class="tick" data-group="pw">
-        <span class="q">Has the player been warned?</span>
-        <label class="opt"><input type="checkbox" name="pw" value="Yes"> Yes</label>
-        <label class="opt"><input type="checkbox" name="pw" value="No"> No</label>
-      </div>
-      <div class="tick" data-group="tw">
-        <span class="q">Has the team been warned?</span>
-        <label class="opt"><input type="checkbox" name="tw" value="Yes"> Yes</label>
-        <label class="opt"><input type="checkbox" name="tw" value="No"> No</label>
-      </div>
-
     </div>
   </section>
 
   <section>
-    <h2>4. Description of incident</h2>
+    <h2>5. When it happened &amp; cautions</h2>
+    <div class="grid">
+      <div><label for="half">Period of game when incident occurred</label>
+        <select id="half" name="half"><option value="">Select…</option><option>1st half</option><option>2nd half</option><option>Extra time</option></select></div>
+      <div><label for="mins">Elapsed time in match (minutes)</label><input type="number" id="mins" name="mins" min="0" max="120" inputmode="numeric"></div>
+    </div>
+    <div class="stack" style="margin-top:12px">
+      <p class="hint" style="margin:0"><b>Were any cautions issued to:</b></p>
+      <div class="tick" data-group="pw">
+        <span class="q">(a) Individual (the player)</span>
+        <label class="opt"><input type="checkbox" name="pw" value="Yes"> Yes</label>
+        <label class="opt"><input type="checkbox" name="pw" value="No"> No</label>
+      </div>
+      <div class="tick" data-group="tw">
+        <span class="q">(b) General (the team)</span>
+        <label class="opt"><input type="checkbox" name="tw" value="Yes"> Yes</label>
+        <label class="opt"><input type="checkbox" name="tw" value="No"> No</label>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>6. Incident detected / referred by</h2>
+    <p class="hint" style="margin:0 0 10px">A separate report is needed for each official, if applicable. Tick the official(s) who detected or referred the incident.</p>
+    <div id="officials" class="stack"></div>
+  </section>
+
+  <section>
+    <h2>7. Description of offence</h2>
     <label for="desc">What happened?</label>
     <textarea id="desc" name="desc" placeholder="Describe the incident, what was said or done, and any action taken."></textarea>
     <button type="button" class="ai-btn" id="previewBtn" disabled>Preview &amp; improve report (AI)</button>
     <p class="hint" id="previewHint">Write the description first (at least a couple of sentences) to unlock the preview.</p>
   </section>
 
-  <section>
-    <h2>5. Report author</h2>
-    <div class="grid">
-      <div><label for="author">Name</label><input type="text" id="author" name="author"></div>
-      <div><label for="role">Role</label>
-        <select id="role" name="role"><option value="">Select…</option><option>Referee</option><option>Assistant referee</option><option>Referee coach</option><option>Assessor</option><option>Other</option></select></div>
-    </div>
-  </section>
-
   <div class="actions">
-    <button type="button" class="primary" id="save">Save report (download)</button>
+    <button type="button" class="primary" id="save">Save report</button>
     <button type="button" class="secondary" id="print">Print / PDF</button>
     <button type="button" class="danger" id="clear">Clear form</button>
   </div>
   <div class="status" id="status"></div>
+
+  <section class="notice" style="margin-top:16px">
+    <p><b>Please email this form to ash.mac@vodamail.co.za within 24 hours after the match.</b> A copy can be sent via WhatsApp to Ashley Mackay (082 255 0242).</p>
+    <p><b>Officials:</b> please send a copy via WhatsApp to Eugene de Villiers (082 448 9635) directly after the match.</p>
+    <div class="actions">
+      <button type="button" class="secondary" id="mailBtn">Email to Ashley Mackay</button>
+      <button type="button" class="secondary" id="waAsh">WhatsApp Ashley Mackay</button>
+      <button type="button" class="secondary" id="waEug">WhatsApp Eugene de Villiers</button>
+    </div>
+    <p class="hint">These buttons also save the report to the Dashboard. For email, the report is downloaded as a file so you can attach it.</p>
+  </section>
+  <p class="privacy">The personal information collected in this form is processed by WPRU in accordance with the applicable WPRU Privacy Policy, available on request.</p>
 </form>
 
 <div id="previewWrap" class="hidden">
@@ -234,7 +349,7 @@
   </section>
 
   <section>
-    <h2>Description (you can edit this)</h2>
+    <h2>Description of offence (you can edit this)</h2>
     <textarea id="pvDesc"></textarea>
   </section>
 
@@ -243,25 +358,122 @@
     <ul id="sugg"></ul>
     <h3>Questions the committee may ask</h3>
     <ul id="miss"></ul>
-    <p class="hint">Suggestions are guidance only and are not part of the downloaded report. Review everything for accuracy before submitting.</p>
+    <p class="hint">Suggestions are guidance only and are not part of the saved report. Review everything for accuracy before submitting.</p>
   </section>
 
   <div class="actions noprint">
     <button type="button" class="secondary" id="backBtn">Back to form</button>
     <button type="button" class="secondary" id="rerunBtn">Run AI again</button>
     <button type="button" class="secondary" id="origBtn">Restore my original wording</button>
-    <button type="button" class="primary" id="dlBtn">Download final report</button>
+    <button type="button" class="primary" id="dlBtn">Save final report</button>
     <button type="button" class="secondary" id="prBtn">Print / PDF</button>
   </div>
+  <div class="status" id="pvStatus"></div>
+</div>
+</div>
+
+<div id="viewDash" class="hidden">
+  <section>
+    <h2>Dashboard</h2>
+    <div class="grid">
+      <div><label for="fComp">WPRU competition</label><select id="fComp"><option value="">All</option></select></div>
+      <div><label for="fType">Type of report</label><select id="fType"><option value="">All</option></select></div>
+      <div><label for="fQ">Search (player, team, official, venue)</label><input type="text" id="fQ" placeholder="Type to search"></div>
+    </div>
+  </section>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="dgrid">
+    <section><h2>Reports by type</h2><div id="chType"></div></section>
+    <section><h2>Reports by competition</h2><div id="chComp"></div></section>
+    <section><h2>Laws referenced</h2><div id="chLaw"></div></section>
+    <section><h2>Reports per month</h2><div id="chMonth"></div></section>
+  </div>
+
+  <section class="dsec">
+    <h2>Reports</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Date</th><th>Competition</th><th>Match</th><th>Player</th><th>Type</th><th>Laws</th><th>Referee</th><th></th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button type="button" class="secondary" id="exportCsv">Export to Excel (CSV)</button>
+      <button type="button" class="secondary" id="exportJson">Download backup</button>
+      <button type="button" class="secondary" id="importBtn">Restore backup</button>
+      <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+    </div>
+    <div class="status" id="dashStatus"></div>
+    <p class="hint">Saved reports are kept in this browser on this device. Use "Download backup" to move them to another device or keep a safe copy.</p>
+  </section>
 </div>
 </main>
 
 <script>
 (function(){
-  var f=document.getElementById('f'), KEY='wprrs_incident_draft', st=document.getElementById('status');
+  var f=document.getElementById('f'), KEY='wprrs_incident_draft', CUR='wprrs_current_id', REP='wprrs_reports';
+  var el=function(id){return document.getElementById(id)};
+  var st=el('status');
   function say(m){st.textContent=m}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 
-  // Yes/No tick boxes: only one of the pair can be ticked
+  var curId=''; try{curId=localStorage.getItem(CUR)||''}catch(e){}
+  var P={laws:[]};
+  var law=el('law'), rtype=el('rtype'), comp=el('comp'), desc=el('desc');
+  var T_YC='Temporary suspension (yellow card)', T_RC='Send off (red card)', T_MB='Match blown off';
+  function normType(t){return t==='Yellow card'?T_YC:t==='Red card'?T_RC:(t||'')}
+
+  // ---- Law infringement tick list (same numbers as the WP template) ----
+  var LAWGROUPS=[
+    ['Law 9 – Obstruction',['9.1','9.2','9.3','9.4','9.5','9.6']],
+    ['Law 9 – Unfair play',['9.7.a','9.7.b','9.7.c','9.8','9.9','9.10']],
+    ['Law 9 – Dangerous play',['9.11','9.12','9.13','9.14','9.15','9.16','9.17','9.18','9.19.a','9.19.b','9.19.c','9.19.d','9.20.a','9.20.b','9.20.c','9.21','9.22','9.23','9.24','9.25']],
+    ['Law 9 – Misconduct',['9.26','9.27','9.28']],
+    ['Law 3 and Law 4',['3.7','4.7']]
+  ];
+  el('lawChips').innerHTML=LAWGROUPS.map(function(g){
+    return '<div class="lawgroup"><h3>'+esc(g[0])+'</h3><div class="chips">'+g[1].map(function(n){
+      return '<label class="chip"><input type="checkbox" name="lawn" value="'+n+'"> '+n+'</label>';
+    }).join('')+'</div></div>';
+  }).join('');
+
+  // ---- Officials (name, contact, email, signature) ----
+  var OFF=[['ref','Referee'],['ar1','Assistant referee 1'],['ar2','Assistant referee 2']];
+  el('officials').innerHTML=OFF.map(function(o){
+    var k=o[0];
+    return '<div class="off"><h3><span>'+o[1]+'</span><label class="det"><input type="checkbox" name="det" value="'+k+'"> Detected / referred this incident</label></h3>'+
+      '<div class="grid">'+
+      '<div><label for="'+k+'">Name</label><input type="text" id="'+k+'" name="'+k+'"></div>'+
+      '<div><label for="'+k+'Tel">Contact number</label><input type="tel" id="'+k+'Tel" name="'+k+'Tel" inputmode="tel"></div>'+
+      '<div><label for="'+k+'Email">Email address</label><input type="email" id="'+k+'Email" name="'+k+'Email"></div>'+
+      '</div>'+
+      '<div class="sig" style="margin-top:10px"><label>Signature (sign with your finger or mouse)</label>'+
+      '<canvas id="'+k+'SigC" width="600" height="200"></canvas><input type="hidden" id="'+k+'Sig" name="'+k+'Sig">'+
+      '<div class="sigbar"><span>Sign above</span><button type="button" class="secondary" id="'+k+'SigClr">Clear signature</button></div></div></div>';
+  }).join('');
+
+  var SIG={};
+  OFF.forEach(function(o){
+    var k=o[0], c=el(k+'SigC'), h=el(k+'Sig'), x=(c.getContext&&c.getContext('2d'))||null, down=false;
+    SIG[k]={load:function(){
+      if(!x) return;
+      x.clearRect(0,0,c.width,c.height);
+      if(h.value){var im=new Image();im.onload=function(){x.drawImage(im,0,0,c.width,c.height)};im.src=h.value}
+    },clear:function(){if(x)x.clearRect(0,0,c.width,c.height);h.value=''}};
+    if(!x) return;
+    x.lineWidth=3;x.lineCap='round';x.lineJoin='round';x.strokeStyle='#14232f';
+    function pt(e){var r=c.getBoundingClientRect();return {x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height}}
+    c.addEventListener('pointerdown',function(e){down=true;try{c.setPointerCapture(e.pointerId)}catch(er){}var p=pt(e);x.beginPath();x.moveTo(p.x,p.y);x.lineTo(p.x+.1,p.y+.1);x.stroke();e.preventDefault()});
+    c.addEventListener('pointermove',function(e){if(!down)return;var p=pt(e);x.lineTo(p.x,p.y);x.stroke();e.preventDefault()});
+    function end(){if(!down)return;down=false;try{h.value=c.toDataURL('image/png')}catch(er){}persist()}
+    c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
+    el(k+'SigClr').onclick=function(){SIG[k].clear();persist()};
+  });
+  function sigLoadAll(){OFF.forEach(function(o){SIG[o[0]].load()})}
+
+  // ---- Yes / No tick boxes: only one of each pair ----
   document.querySelectorAll('.tick').forEach(function(g){
     g.addEventListener('change',function(e){
       if(e.target.checked){g.querySelectorAll('input').forEach(function(i){if(i!==e.target)i.checked=false})}
@@ -269,71 +481,355 @@
     });
   });
 
-  // Show extra fields for "Other law" and "Values"
-  var law=document.getElementById('law');
+  // ---- Conditional fields ----
+  var RED={'40':20,'35':15,'30':12,'25':10};
   function lawUI(){
-    document.getElementById('valuesBox').classList.toggle('hidden',law.value!=='values');
-    document.getElementById('otherLaw').classList.toggle('hidden',law.value!=='Other law');
+    el('valuesBox').classList.toggle('hidden',law.value!=='values');
+    el('otherLaw').classList.toggle('hidden',law.value!=='Other law');
+  }
+  function compUI(){
+    var s=comp.value==='Schools League'||comp.value==='Tournament';
+    el('compNameBox').classList.toggle('hidden',!s);
+    el('compNameLbl').textContent=comp.value==='Tournament'?'Name of the tournament':'Name of the schools league';
+    if(!s) el('compName').value='';
+  }
+  function redUI(){
+    var on=rtype.value===T_RC, h=el('halfLen').value;
+    el('redBox').classList.toggle('hidden',!on);
+    el('redNote').textContent=(h&&RED[h])
+      ?'In '+h+'-minute halves, the red-carded player may be replaced after '+RED[h]+' minutes of playing time.'
+      :'Choose the length of each half to see when the replacement may take the field.';
+  }
+  function rtypeUI(){
+    el('rtypeOther').classList.toggle('hidden',rtype.value!=='Other');
+    redUI();
   }
   law.addEventListener('change',lawUI);
-  var rtype=document.getElementById('rtype');
-  function rtypeUI(){document.getElementById('rtypeOther').classList.toggle('hidden',rtype.value!=='Other')}
+  comp.addEventListener('change',compUI);
   rtype.addEventListener('change',rtypeUI);
+  el('halfLen').addEventListener('change',redUI);
 
+  function hintUI(){
+    var ok=desc.value.trim().length>=30;
+    el('previewBtn').disabled=!ok;
+    el('previewHint').textContent=ok?'Opens a preview with an AI-improved description, the laws that apply and DC hearing suggestions. You can edit everything.':'Write the description first (at least a couple of sentences) to unlock the preview.';
+  }
+  desc.addEventListener('input',hintUI);
+
+  // ---- Form data ----
   function collect(){
     var d={};
-    f.querySelectorAll('input,select,textarea').forEach(function(el){
-      if(el.type==='checkbox'){ if(el.checked){(d[el.name]=d[el.name]||[]).push(el.value)} }
-      else d[el.name]=el.value;
+    f.querySelectorAll('input,select,textarea').forEach(function(x){
+      if(!x.name) return;
+      if(x.type==='checkbox'){ if(x.checked){(d[x.name]=d[x.name]||[]).push(x.value)} }
+      else d[x.name]=x.value;
     });
     return d;
+  }
+  function applyData(d){
+    d=Object.assign({},d); if(d.rtype) d.rtype=normType(d.rtype);
+    f.querySelectorAll('input,select,textarea').forEach(function(x){
+      if(!x.name) return;
+      if(x.type==='checkbox'){x.checked=(d[x.name]||[]).indexOf(x.value)>-1}
+      else if(d[x.name]!==undefined){x.value=d[x.name]}
+    });
+    lawUI();compUI();rtypeUI();hintUI();sigLoadAll();
   }
   function persist(){try{localStorage.setItem(KEY,JSON.stringify(collect()))}catch(e){}}
   function restore(){
     try{
       var d=JSON.parse(localStorage.getItem(KEY)||'null'); if(!d) return;
-      f.querySelectorAll('input,select,textarea').forEach(function(el){
-        if(el.type==='checkbox'){el.checked=(d[el.name]||[]).indexOf(el.value)>-1}
-        else if(d[el.name]!==undefined){el.value=d[el.name]}
-      });
-      lawUI(); rtypeUI(); say('Draft restored.');
+      applyData(d); say('Draft restored.');
     }catch(e){}
   }
   f.addEventListener('input',persist);
+  f.addEventListener('change',persist);
 
-  function text(d){
-    var home=d.home||'Home', away=d.away||'Away';
-    var who=d.pteam==='home'?home:d.pteam==='away'?away:'';
-    var law=d.law==='values'?'Against the spirit of the game (Values)':(d.law==='Other law'&&d.otherText?'Other law: '+d.otherText:d.law);
-    var L=[
-      'WPRRS INCIDENT REPORT','',
-      'Date: '+(d.date||''),'Competition: '+(d.comp||''),'Venue: '+(d.venue||''),'Referee: '+(d.ref||''),
-      'Type of report: '+(d.rtype==='Other'&&d.rtypeText?'Other: '+d.rtypeText:(d.rtype||'')),'',
-      'SCORE AT TIME OF INCIDENT',
-      home+' '+(d.hs||'0')+'  -  '+(d.as||'0')+' '+away,
-      'Time: '+(d.mins||'')+' min  '+(d.half||''),'',
-      'PLAYER & LAW',
-      'Player: '+(d.pname||'')+' #'+(d.pnum||'')+(who?' ('+who+')':''),
-      'Law infringement: '+(law||'')
-    ];
-    if(d.law==='values'&&d.val) L.push('Values breached: '+d.val.join(', '));
-    L.push('Player warned: '+((d.pw||[])[0]||'Not answered'));
-    L.push('Team warned: '+((d.tw||[])[0]||'Not answered'));
-    L.push('','DESCRIPTION',d.desc||'','','Reported by: '+(d.author||'')+' ('+(d.role||'')+')');
-    return L.join('\n');
+  // ---- Labels ----
+  function lawLabel(d){return d.law==='values'?'Against the spirit of the game (Values)':(d.law==='Other law'&&d.otherText?'Other law: '+d.otherText:(d.law==='Other law'?'Other law':(d.law||'')))}
+  function selectedLaws(d){var a=(d.lawn||[]).map(function(n){return 'Law '+n});var o=lawLabel(d);if(o)a.push(o);return a}
+  function compLabel(d){return (d.comp==='Schools League'||d.comp==='Tournament')&&d.compName?d.comp+': '+d.compName:(d.comp||'')}
+  function rtypeLabel(d){var t=normType(d.rtype);return t==='Other'&&d.rtypeText?'Other: '+d.rtypeText:t}
+  function redLine(d){
+    if(normType(d.rtype)!==T_RC||!d.halfLen||!RED[d.halfLen]) return '';
+    return 'Red card return rule (Law 9.30 amendment): '+d.halfLen+'-minute halves, replacement may take the field after '+RED[d.halfLen]+' minutes of playing time';
   }
 
-  document.getElementById('save').onclick=function(){
-    var d=collect(), blob=new Blob([text(d)],{type:'text/plain'}), a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download='WPRRS-incident-'+(d.date||'report')+'.txt';
+  function text(d){
+    var home=d.home||'Home', away=d.away||'Visiting';
+    var who=d.pteam==='home'?home:d.pteam==='away'?away:'';
+    var L=['REFEREE/ASSISTANT REFEREE REPORT ON TEMPORARY SUSPENSION OR SEND OFF OR MATCH BLOWN OFF','',
+      'Type of report: '+rtypeLabel(d)];
+    var rl=redLine(d); if(rl) L.push(rl);
+    L.push('WPRU Competition: '+compLabel(d),
+      'Venue: '+(d.venue||''),
+      'Date of match: '+(d.date||''),'',
+      'Home team: '+home,'Visiting team: '+away,
+      'Score at time of incident: '+home+' '+(d.hs||'0')+' - '+(d.as||'0')+' '+away,'',
+      'PLAYER',
+      'Player\'s full name: '+(d.pname||''),
+      'Team: '+who,
+      'Playing position: '+(d.ppos||''),
+      'Playing number: '+(d.pnum||''),'',
+      'LAW INFRINGEMENT',
+      selectedLaws(d).join('; ')||'None selected');
+    if(d.law==='values'&&d.val) L.push('Values breached: '+d.val.join(', '));
+    L.push('',
+      'Period of game when incident occurred: '+(d.half||''),
+      'Elapsed time in match: '+(d.mins||'')+(d.mins?' min':''),
+      'Were any cautions issued to: (a) Individual: '+((d.pw||[])[0]||'Not answered')+'   (b) General: '+((d.tw||[])[0]||'Not answered'),'',
+      'THE INCIDENT WAS DETECTED / REFERRED BY');
+    OFF.forEach(function(o){
+      var k=o[0];
+      L.push(o[1]+': '+(d[k]||'')+' | Contact: '+(d[k+'Tel']||'')+' | Email: '+(d[k+'Email']||'')+' | Signature: '+(d[k+'Sig']?'Signed':'Not signed')+((d.det||[]).indexOf(k)>-1?' | Detected/referred this incident':''));
+    });
+    L.push('','DESCRIPTION OF OFFENCE',d.desc||'');
+    return L.join('\n');
+  }
+  function fullText(d,laws){
+    var out=text(d);
+    if(laws&&laws.length){
+      var lines=laws.map(function(l,i){return (i+1)+'. '+l.law+(l.reason?' - '+l.reason:'')});
+      out=out.replace('\n\nDESCRIPTION','\n\nLAWS OF THE GAME REFERENCED\n'+lines.join('\n')+'\n\nDESCRIPTION');
+    }
+    return out;
+  }
+  function download(name,content,type){
+    var blob=new Blob([content],{type:type||'text/plain'}),a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download=name;
     document.body.appendChild(a);a.click();a.remove();
-    say('Report downloaded.');
+  }
+
+  // ---- Law helpers ----
+  var LAWN={1:'The ground',2:'Ball',3:'Team',4:'Permitted clothing',5:'Time',6:'Match officials',7:'Advantage',8:'Scoring',9:'Foul play',10:'Offside and onside in open play',11:'Knock forward or throw forward',12:'Kick-off and restart kicks',13:'Players on the ground in open play',14:'Tackle',15:'Ruck',16:'Maul',17:'Mark',18:'Touch, quick throw and lineout',19:'Scrum',20:'Penalty and free-kick',21:'In-goal'};
+  function lawKey(s){
+    s=String(s||'');
+    var m=s.match(/Law\s*(\d{1,2})((?:\.\d{1,2})(?:\.[a-z])?)?/i);
+    if(m&&LAWN[+m[1]]) return m[2]?'Law '+(+m[1])+m[2]:'Law '+(+m[1])+' – '+LAWN[+m[1]];
+    if(/spirit/i.test(s)) return 'Spirit of the game (Values)';
+    return s.trim()||'Not specified';
+  }
+  function cleanLaws(a){return (a||[]).filter(function(l){return l&&l.law&&String(l.law).trim()}).map(function(l){return {law:String(l.law).trim(),reason:String(l.reason||'').trim()}})}
+  function listFor(d,base,addSelected){
+    var out=cleanLaws(base), empty=!out.length, add=[];
+    selectedLaws(d).forEach(function(s){
+      if((addSelected||empty)&&!out.some(function(l){return lawKey(l.law)===lawKey(s)})&&!add.some(function(l){return lawKey(l.law)===lawKey(s)})) add.push({law:s,reason:''});
+    });
+    return add.concat(out);
+  }
+
+  // ---- Saved reports (stored in this browser) ----
+  function getReports(){try{return JSON.parse(localStorage.getItem(REP)||'[]')}catch(e){return []}}
+  function setReports(a){try{localStorage.setItem(REP,JSON.stringify(a));return true}catch(e){return false}}
+  function uid(){return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+  function saveRecord(d,list){
+    var all=getReports(), now=new Date().toISOString(), rec=null;
+    all.forEach(function(r){if(r.id===curId)rec=r});
+    if(!rec){rec={id:uid(),created:now};all.unshift(rec);curId=rec.id}
+    rec.updated=now;rec.form=d;rec.laws=list;
+    var ok=setReports(all);
+    try{localStorage.setItem(CUR,curId)}catch(e){}
+    return ok;
+  }
+  // Save the report to the Dashboard and return its text
+  function commit(fromPreview){
+    var d=collect();
+    if(fromPreview) d.desc=el('pvDesc').value;
+    var list=listFor(d,P.laws,!fromPreview);
+    var ok=saveRecord(d,list);
+    return {d:d,ok:ok,txt:fullText(d,(fromPreview||P.laws.length)?list:null)};
+  }
+  function fname(d,suffix){return 'WPRRS-incident-'+(d.date||'report')+(suffix||'')+'.txt'}
+
+  el('save').onclick=function(){
+    var r=commit(false);
+    download(fname(r.d),r.txt);
+    say(r.ok?'Saved to the Dashboard and downloaded. Press "Clear form" to start a new report.':'Downloaded, but the report could not be saved to the Dashboard (browser storage is blocked or full).');
   };
-  document.getElementById('print').onclick=function(){window.print()};
-  document.getElementById('clear').onclick=function(){
-    if(confirm('Clear everything on this form?')){f.reset();lawUI();rtypeUI();try{localStorage.removeItem(KEY)}catch(e){};say('Form cleared.')}
+  el('print').onclick=function(){window.print()};
+  el('clear').onclick=function(){
+    if(confirm('Clear everything on this form?')){
+      f.reset();applyData({});P.laws=[];curId='';
+      try{localStorage.removeItem(KEY);localStorage.removeItem(CUR)}catch(e){}
+      say('Form cleared.');
+    }
   };
+
+  // ---- Send to the WP contacts ----
+  function clip(t,n){return t.length>n?t.slice(0,n)+'\n\n[Report shortened. See the attached file for the full report.]':t}
+  el('mailBtn').onclick=function(){
+    var r=commit(false);
+    download(fname(r.d),r.txt);
+    var subj='Incident report - '+(rtypeLabel(r.d)||'report')+' - '+(r.d.date||'');
+    window.location.href='mailto:ash.mac@vodamail.co.za?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(clip(r.txt,1400));
+    say('Saved. Please attach the downloaded file to the email.');
+  };
+  function wa(num){
+    var r=commit(false);
+    window.open('https://wa.me/'+num+'?text='+encodeURIComponent(clip(r.txt,3000)),'_blank');
+    say('Saved to the Dashboard.');
+  }
+  el('waAsh').onclick=function(){wa('27822550242')};
+  el('waEug').onclick=function(){wa('27824489635')};
+
+  // ---- Views ----
+  function showView(v){
+    el('viewForm').classList.toggle('hidden',v!=='form');
+    el('viewDash').classList.toggle('hidden',v!=='dash');
+    el('navForm').classList.toggle('on',v==='form');
+    el('navDash').classList.toggle('on',v==='dash');
+    if(v==='dash') renderDash();
+    window.scrollTo(0,0);
+  }
+  el('navForm').onclick=function(){showView('form')};
+  el('navDash').onclick=function(){showView('dash')};
+
+  // ---- Dashboard ----
+  function dateOf(r){var d=r.form||{};return d.date||(r.created||'').slice(0,10)}
+  function typeKey(d){return normType(d.rtype)||'Not set'}
+  (function(){
+    var o='<option value="">All</option>';
+    Array.prototype.forEach.call(comp.options,function(op){if(op.text!=='Select…')o+='<option>'+esc(op.text)+'</option>'});
+    el('fComp').innerHTML=o;
+    el('fType').innerHTML='<option value="">All</option><option>'+T_YC+'</option><option>'+T_RC+'</option><option>'+T_MB+'</option><option>Other</option><option>Not set</option>';
+  })();
+
+  function filtered(){
+    var c=el('fComp').value,t=el('fType').value,q=el('fQ').value.trim().toLowerCase();
+    return getReports().filter(function(r){
+      var d=r.form||{};
+      if(c&&d.comp!==c) return false;
+      if(t&&typeKey(d)!==t) return false;
+      if(q){
+        var hay=[d.pname,d.pnum,d.ppos,d.home,d.away,d.ref,d.ar1,d.ar2,d.venue,d.compName].join(' ').toLowerCase();
+        if(hay.indexOf(q)<0) return false;
+      }
+      return true;
+    }).sort(function(a,b){return dateOf(b)<dateOf(a)?-1:dateOf(b)>dateOf(a)?1:0});
+  }
+  function tally(list,fn){
+    var m={};
+    list.forEach(function(r){var k=fn(r);(Array.isArray(k)?k:[k]).forEach(function(x){m[x]=(m[x]||0)+1})});
+    return m;
+  }
+  var TYPE_COL={};TYPE_COL[T_YC]='#fbf072';TYPE_COL[T_RC]='#d91f28';TYPE_COL[T_MB]='#005597';TYPE_COL['Other']='#f281c6';TYPE_COL['Not set']='#b9c8d3';
+  function bars(id,entries,colFn){
+    var box=el(id);
+    if(!entries.length){box.innerHTML='<div class="empty">No data yet.</div>';return}
+    var max=Math.max.apply(null,entries.map(function(e){return e[1]}));
+    box.innerHTML=entries.map(function(e){
+      var w=Math.max(4,Math.round(e[1]/max*100));
+      return '<div class="bar"><span>'+esc(e[0])+'</span><span class="t"><i style="width:'+w+'%;background:'+(colFn?colFn(e[0]):'var(--primary)')+'"></i></span><span class="n">'+e[1]+'</span></div>';
+    }).join('');
+  }
+  function sorted(m,limit){
+    var a=Object.keys(m).map(function(k){return [k,m[k]]}).sort(function(x,y){return y[1]-x[1]||(x[0]<y[0]?-1:1)});
+    return limit?a.slice(0,limit):a;
+  }
+  function monthLabel(k){var p=k.split('-');return new Date(+p[0],+p[1]-1,1).toLocaleDateString('en-ZA',{month:'short',year:'numeric'})}
+
+  function renderDash(){
+    var list=filtered(), all=getReports();
+    var n=function(fn){return list.filter(fn).length};
+    var cards=[
+      ['Total reports',list.length,'#005597'],
+      ['Temporary suspensions',n(function(r){return typeKey(r.form||{})===T_YC}),'#fbf072'],
+      ['Send offs',n(function(r){return typeKey(r.form||{})===T_RC}),'#d91f28'],
+      ['Match blown off',n(function(r){return typeKey(r.form||{})===T_MB}),'#005597'],
+      ['Individual cautions',n(function(r){return ((r.form||{}).pw||[])[0]==='Yes'}),'#6ca003'],
+      ['General cautions',n(function(r){return ((r.form||{}).tw||[])[0]==='Yes'}),'#f281c6']
+    ];
+    el('cards').innerHTML=cards.map(function(c){return '<div class="card" style="border-top-color:'+c[2]+'"><b>'+c[1]+'</b><span>'+esc(c[0])+'</span></div>'}).join('');
+
+    bars('chType',sorted(tally(list,function(r){return typeKey(r.form||{})})),function(k){return TYPE_COL[k]||'#005597'});
+    bars('chComp',sorted(tally(list,function(r){return (r.form||{}).comp||'Not set'})));
+    bars('chLaw',sorted(tally(list,function(r){
+      var ks={};(r.laws||[]).forEach(function(l){ks[lawKey(l.law)]=1});
+      var a=Object.keys(ks);return a.length?a:['Not specified'];
+    }),8),function(){return '#6ca003'});
+    var months=tally(list,function(r){var d=dateOf(r);return d?d.slice(0,7):'Unknown'});
+    var mk=Object.keys(months).sort().slice(-12);
+    bars('chMonth',mk.map(function(k){return [k==='Unknown'?'Unknown':monthLabel(k),months[k]]}),function(){return '#f281c6'});
+
+    var tb=el('tbody');
+    if(!list.length){
+      tb.innerHTML='<tr><td colspan="8" class="empty">'+(all.length?'No reports match these filters.':'No reports saved yet. Complete a report and press "Save report".')+'</td></tr>';
+    } else {
+      tb.innerHTML=list.map(function(r){
+        var d=r.form||{};
+        var laws=cleanLaws(r.laws).map(function(l){return lawKey(l.law).split(' – ')[0]}).filter(function(v,i,a){return a.indexOf(v)===i}).join(', ');
+        return '<tr><td>'+esc(dateOf(r))+'</td><td>'+esc(compLabel(d))+'</td>'+
+          '<td>'+esc((d.home||'Home')+' '+(d.hs||0)+' - '+(d.as||0)+' '+(d.away||'Visiting'))+'</td>'+
+          '<td>'+esc((d.pname||'')+(d.pnum?' #'+d.pnum:''))+'</td>'+
+          '<td>'+esc(rtypeLabel(d))+'</td><td>'+esc(laws)+'</td><td>'+esc(d.ref||'')+'</td>'+
+          '<td><button type="button" class="secondary" data-open="'+esc(r.id)+'">Open</button><button type="button" class="danger" data-del="'+esc(r.id)+'">Delete</button></td></tr>';
+      }).join('');
+    }
+  }
+  ['fComp','fType'].forEach(function(id){el(id).addEventListener('change',renderDash)});
+  el('fQ').addEventListener('input',renderDash);
+
+  el('tbody').addEventListener('click',function(e){
+    var o=e.target.getAttribute('data-open'), x=e.target.getAttribute('data-del');
+    if(o) loadRecord(o);
+    if(x&&confirm('Delete this report from the Dashboard? This cannot be undone.')){
+      setReports(getReports().filter(function(r){return r.id!==x}));
+      if(x===curId){curId='';try{localStorage.removeItem(CUR)}catch(er){}}
+      renderDash();
+    }
+  });
+  function loadRecord(id){
+    var r=getReports().filter(function(z){return z.id===id})[0]; if(!r) return;
+    f.reset();applyData(r.form||{});
+    P.laws=cleanLaws(r.laws);curId=id;
+    try{localStorage.setItem(CUR,id)}catch(e){}
+    persist();
+    el('previewWrap').classList.add('hidden');f.classList.remove('hidden');
+    document.querySelector('header p').classList.remove('hidden');
+    showView('form');
+    say('Report loaded. Make your changes and press "Save report" to update it.');
+  }
+
+  function csvCell(v){
+    v=String(v==null?'':v);
+    if(/^[=+\-@]/.test(v)) v="'"+v;
+    return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
+  }
+  el('exportCsv').onclick=function(){
+    var rows=[['Date','Competition','Venue','Type of report','Home team','Home score','Visiting team','Visiting score','Period','Elapsed minutes','Player','Playing position','Playing number','Player team','Laws referenced','Individual caution','General caution','Referee','Referee contact','Referee email','Assistant referee 1','Assistant referee 2','Description of offence']];
+    filtered().forEach(function(r){
+      var d=r.form||{};
+      rows.push([dateOf(r),compLabel(d),d.venue,rtypeLabel(d),d.home,d.hs,d.away,d.as,d.half,d.mins,d.pname,d.ppos,d.pnum,
+        d.pteam==='home'?d.home:d.pteam==='away'?d.away:'',
+        cleanLaws(r.laws).map(function(l){return l.law}).join('; '),
+        (d.pw||[])[0]||'',(d.tw||[])[0]||'',d.ref,d.refTel,d.refEmail,d.ar1,d.ar2,d.desc]);
+    });
+    download('WPRRS-reports.csv','﻿'+rows.map(function(r){return r.map(csvCell).join(',')}).join('\r\n'),'text/csv');
+  };
+  el('exportJson').onclick=function(){download('WPRRS-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(getReports(),null,2),'application/json')};
+  el('importBtn').onclick=function(){el('importFile').click()};
+  el('importFile').addEventListener('change',function(e){
+    var file=e.target.files[0]; if(!file) return;
+    var rd=new FileReader();
+    rd.onload=function(){
+      try{
+        var inc=JSON.parse(rd.result); if(!Array.isArray(inc)) throw new Error('bad');
+        var cur=getReports(), byId={};
+        cur.forEach(function(r){byId[r.id]=r});
+        var added=0;
+        inc.forEach(function(r){
+          if(!r||!r.id||!r.form) return;
+          if(!byId[r.id]){added++;byId[r.id]=r}
+          else if((r.updated||'')>(byId[r.id].updated||'')){byId[r.id]=r}
+        });
+        setReports(Object.keys(byId).map(function(k){return byId[k]}));
+        el('dashStatus').textContent='Backup restored: '+added+' new report(s) added.';
+        renderDash();
+      }catch(err){el('dashStatus').textContent='That file is not a valid WPRRS backup.'}
+      e.target.value='';
+    };
+    rd.readAsText(file);
+  });
 
   // ===== AI preview =====
   var LAWS_TXT='Law 1 The ground; Law 2 Ball; Law 3 Team (incl. replacements); Law 4 Permitted clothing; Law 5 Time; Law 6 Match officials; Law 7 Advantage; Law 8 Scoring; Law 9 Foul play; Law 10 Offside and onside in open play; Law 11 Knock forward or throw forward; Law 12 Kick-off and restart kicks; Law 13 Players on the ground in open play; Law 14 Tackle; Law 15 Ruck; Law 16 Maul; Law 17 Mark; Law 18 Touch, quick throw and lineout; Law 19 Scrum; Law 20 Penalty and free-kick; Law 21 In-goal.';
@@ -341,41 +837,31 @@
     'You help rugby referees in Western Province, South Africa, write incident reports that can be used at a disciplinary committee (DC) hearing.',
     'Rewrite the referee description so it is clear, factual, objective, in the first person and in chronological order. Keep the referee\'s meaning. Fix spelling and grammar. Use plain, professional language.',
     'NEVER invent facts, names, times, injuries or quotes that are not in the input. If something important is missing, list it in missing_info instead of guessing.',
-    'Reference the World Rugby Laws of the Game. Identify EVERY law that applies to the facts, not just one (for example foul play together with tackle, ruck, advantage or offside). Give the whole law number and title. Only add a sub-law number (such as 9.12) if you are certain of it, and say it must be verified against the current Laws booklet.',
+    'Reference the World Rugby Laws of the Game. Identify EVERY law that applies to the facts, not just one (for example foul play together with tackle, ruck, advantage or offside). Give the whole law number and title.',
+    'The referee ticks sub-law numbers from the WP incident report template (3.7, 4.7 and 9.1 to 9.28). Keep every ticked number exactly as ticked, written like "Law 9.12". Do not describe what a sub-law says unless you are certain, and say it must be verified against the current Laws booklet.',
     'Laws: '+LAWS_TXT,
+    'Local WP rule - Law 9.30 amendment (red card return rule): a red-carded player may be replaced after a set amount of playing time per half: 40-minute halves after 20 minutes; 35 after 15; 30 after 12; 25 after 10. Mention it only for a send off (red card) report where the half length is given.',
     'If the conduct (for example abuse, dissent or disrespect) is not covered by a specific law, reference the spirit of the game and World Rugby\'s core values (Integrity, Passion, Solidarity, Discipline, Respect).',
     'Do not decide guilt and do not recommend a sanction. Describe what the referee saw and heard and the action the referee took.',
-    'suggestions: 4 to 8 short, practical tips to strengthen the report for a DC hearing (for example exact words used, referee position and distance, whether and when a warning was given, outcome and who was informed, witnesses, whether it was seen live or on video, injury to the other player).',
+    'suggestions: 4 to 8 short, practical tips to strengthen the report for a DC hearing (for example exact words used, referee position and distance, whether and when a caution was given, outcome and who was informed, witnesses, whether it was seen live or on video, injury to the other player).',
     'missing_info: questions the DC is likely to ask that the description does not answer.',
-    'Respond with JSON only, no markdown fences, in exactly this shape: {"amended_description":"...","laws":[{"law":"Law 9 - Foul play","reason":"..."}],"suggestions":["..."],"missing_info":["..."]}'
+    'Respond with JSON only, no markdown fences, in exactly this shape: {"amended_description":"...","laws":[{"law":"Law 9.12","reason":"..."}],"suggestions":["..."],"missing_info":["..."]}'
   ].join('\n');
-
-  var P={laws:[]};
-  var el=function(id){return document.getElementById(id)};
-  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 
   function getAI(){try{return JSON.parse(localStorage.getItem('wprrs_ai')||'{}')}catch(e){return {}}}
   function saveAI(){try{localStorage.setItem('wprrs_ai',JSON.stringify({url:el('aiUrl').value.trim(),key:el('aiKey').value.trim(),model:el('aiModel').value.trim()}))}catch(e){}}
   ['aiUrl','aiKey','aiModel'].forEach(function(id){el(id).addEventListener('input',saveAI)});
   (function(){var s=getAI();el('aiUrl').value=s.url||'';el('aiKey').value=s.key||'';el('aiModel').value=s.model||''})();
 
-  // Law picker for "Add law"
   (function(){
     var o='';
+    LAWGROUPS.forEach(function(g){g[1].forEach(function(n){o+='<option>Law '+n+'</option>'})});
     Array.prototype.forEach.call(law.options,function(op){
-      if(!op.text||op.text==='Select…'||op.text==='Other law') return;
+      if(!op.text||op.text==='None'||op.text==='Other law') return;
       o+='<option>'+esc(op.text)+'</option>';
     });
     el('addLaw').innerHTML=o;
   })();
-
-  var desc=el('desc');
-  function hintUI(){
-    var ok=desc.value.trim().length>=30;
-    el('previewBtn').disabled=!ok;
-    el('previewHint').textContent=ok?'Opens a preview with an AI-improved description, the laws that apply and DC hearing suggestions. You can edit everything.':'Write the description first (at least a couple of sentences) to unlock the preview.';
-  }
-  desc.addEventListener('input',hintUI);
 
   function callAI(prompt){
     var s=getAI();
@@ -394,29 +880,26 @@
       return r.json();
     }).then(function(j){return (j.content||[]).map(function(c){return c.text||''}).join('')});
   }
-
   function parseJSON(t){var a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<0)throw new Error('The AI reply could not be read.');return JSON.parse(t.slice(a,b+1))}
 
   function promptData(){
-    var d=collect();
-    var home=d.home||'Home', away=d.away||'Away';
+    var d=collect(), home=d.home||'Home', away=d.away||'Visiting';
     return 'Match report data:\n'+JSON.stringify({
-      report_type:d.rtype==='Other'?(d.rtypeText||'Other'):d.rtype,
-      date:d.date,competition:d.comp,venue:d.venue,referee:d.ref,
-      home_team:home,away_team:away,score_at_time:home+' '+(d.hs||0)+' - '+(d.as||0)+' '+away,
-      match_minute:d.mins,half:d.half,
-      player:d.pname,jersey:d.pnum,player_team:d.pteam==='home'?home:d.pteam==='away'?away:'',
-      law_selected_by_referee:d.law==='values'?'Against the spirit of the game (Values)':(d.law==='Other law'?d.otherText:d.law),
+      report_type:rtypeLabel(d),
+      red_card_half_length_minutes:normType(d.rtype)===T_RC?(d.halfLen||''):'',
+      date:d.date,competition:compLabel(d),venue:d.venue,
+      home_team:home,visiting_team:away,score_at_time:home+' '+(d.hs||0)+' - '+(d.as||0)+' '+away,
+      period:d.half,elapsed_minutes:d.mins,
+      player:d.pname,playing_position:d.ppos,playing_number:d.pnum,player_team:d.pteam==='home'?home:d.pteam==='away'?away:'',
+      laws_ticked_by_referee:selectedLaws(d),
       values_breached:d.val||[],
-      player_warned:(d.pw||[])[0]||'not stated',team_warned:(d.tw||[])[0]||'not stated',
+      individual_caution_issued:(d.pw||[])[0]||'not stated',general_caution_issued:(d.tw||[])[0]||'not stated',
+      referee:d.ref,assistant_referee_1:d.ar1,assistant_referee_2:d.ar2,
+      detected_or_referred_by:(d.det||[]),
       referee_description:d.desc
     },null,2);
   }
 
-  function head(){
-    var t=text(collect());
-    return t.split('\n\nDESCRIPTION')[0];
-  }
   function grow(){var t=el('pvDesc');t.style.height='auto';t.style.height=Math.max(220,t.scrollHeight+4)+'px'}
   function renderLaws(){
     var box=el('lawList');
@@ -431,11 +914,10 @@
   el('lawList').addEventListener('click',function(e){var r=e.target.getAttribute('data-rm');if(r!==null){P.laws.splice(+r,1);renderLaws()}});
   el('addLawBtn').onclick=function(){var v=el('addLaw').value;if(v){P.laws.push({law:v,reason:''});renderLaws()}};
   el('pvDesc').addEventListener('input',grow);
-
   function fillList(id,items){el(id).innerHTML=(items&&items.length?items:['None.']).map(function(x){return '<li>'+esc(x)+'</li>'}).join('')}
 
   function run(){
-    el('pvHead').textContent=head();
+    el('pvHead').textContent=text(collect()).split('\n\nDESCRIPTION')[0];
     el('aiStatus').textContent='Improving your report with AI…';
     el('pvDesc').value=desc.value;grow();
     P.laws=[];renderLaws();fillList('sugg',[]);fillList('miss',[]);
@@ -443,37 +925,29 @@
     callAI(promptData()).then(function(t){
       var r=parseJSON(t);
       el('pvDesc').value=r.amended_description||desc.value;grow();
-      P.laws=(r.laws||[]).map(function(l){return {law:l.law||'',reason:l.reason||''}});
+      P.laws=cleanLaws(r.laws);
       renderLaws();fillList('sugg',r.suggestions);fillList('miss',r.missing_info);
       el('aiStatus').textContent='AI draft ready. Please read it, edit where needed and check the laws before you submit.';
     }).catch(function(err){
       if(err.message==='NOAI'){
         el('aiSettings').open=true;
-        el('aiStatus').textContent='AI is not set up yet. Open "AI settings" above and add your AI service address or API key, then press "Run AI again". You can still edit and download the report below.';
+        el('aiStatus').textContent='AI is not set up yet. Open "AI settings" above and add your AI service address or API key, then press "Run AI again". You can still edit and save the report below.';
       } else {
-        el('aiStatus').textContent='Could not reach the AI: '+err.message+' Your own wording is shown below so you can still edit and download it.';
+        el('aiStatus').textContent='Could not reach the AI: '+err.message+' Your own wording is shown below so you can still edit and save it.';
       }
     }).then(function(){['rerunBtn','dlBtn','prBtn'].forEach(function(id){el(id).disabled=false})});
   }
 
-  function finalText(){
-    var d=collect(); d.desc=el('pvDesc').value;
-    var out=text(d);
-    var lines=P.laws.filter(function(l){return l.law.trim()}).map(function(l,i){return (i+1)+'. '+l.law.trim()+(l.reason&&l.reason.trim()?' - '+l.reason.trim():'')});
-    return out.replace('\n\nDESCRIPTION','\n\nLAWS OF THE GAME REFERENCED\n'+(lines.join('\n')||'None listed')+'\n\nDESCRIPTION');
-  }
-
-  el('previewBtn').onclick=function(){f.classList.add('hidden');document.querySelector('header p').classList.add('hidden');el('previewWrap').classList.remove('hidden');window.scrollTo(0,0);run()};
+  el('previewBtn').onclick=function(){f.classList.add('hidden');document.querySelector('header p').classList.add('hidden');el('previewWrap').classList.remove('hidden');el('pvStatus').textContent='';window.scrollTo(0,0);run()};
   el('backBtn').onclick=function(){el('previewWrap').classList.add('hidden');f.classList.remove('hidden');document.querySelector('header p').classList.remove('hidden');window.scrollTo(0,0)};
   el('rerunBtn').onclick=run;
   el('origBtn').onclick=function(){el('pvDesc').value=desc.value;grow()};
   el('dlBtn').onclick=function(){
-    var d=collect(),blob=new Blob([finalText()],{type:'text/plain'}),a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);a.download='WPRRS-incident-'+(d.date||'report')+'-final.txt';
-    document.body.appendChild(a);a.click();a.remove();
+    var r=commit(true);
+    download(fname(r.d,'-final'),r.txt);
+    el('pvStatus').textContent=r.ok?'Saved to the Dashboard and downloaded.':'Downloaded, but the report could not be saved to the Dashboard (browser storage is blocked or full).';
   };
   el('prBtn').onclick=function(){
-    // print a clean copy: header, laws, description
     document.body.classList.add('print-preview');
     window.print();
     document.body.classList.remove('print-preview');
