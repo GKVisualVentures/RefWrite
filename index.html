@@ -211,13 +211,46 @@
   </section>
 
   <section>
-    <h2>3. Player</h2>
-    <div class="grid">
+    <h2 id="secTitle">3. Player</h2>
+
+    <div id="involveBox" class="hidden" style="margin-bottom:12px">
+      <label for="involve">Who or what is this about?</label>
+      <select id="involve" name="involve">
+        <option value="player">Player</option>
+        <option value="team">Team / Coaching staff</option>
+        <option value="safety">Safety reason</option>
+      </select>
+    </div>
+
+    <div id="playerBox" class="grid">
       <div><label for="pname">Player's full name</label><input type="text" id="pname" name="pname"></div>
       <div><label for="pteam">Team</label>
         <select id="pteam" name="pteam"><option value="">Select…</option><option value="home">Home team</option><option value="away">Visiting team</option></select></div>
       <div><label for="ppos">Playing position</label><input type="text" id="ppos" name="ppos"></div>
       <div><label for="pnum">Playing number</label><input type="text" id="pnum" name="pnum" inputmode="numeric"></div>
+    </div>
+
+    <div id="teamBox" class="stack hidden">
+      <div>
+        <label>Who was involved? (tick all that apply)</label>
+        <div class="vals">
+          <label class="opt"><input type="checkbox" name="tinv" value="Multiple players"> Multiple players</label>
+          <label class="opt"><input type="checkbox" name="tinv" value="Team"> Team</label>
+          <label class="opt"><input type="checkbox" name="tinv" value="Coaching staff"> Coaching staff</label>
+          <label class="opt"><input type="checkbox" name="tinv" value="Other" id="tinvOtherChk"> Other</label>
+        </div>
+      </div>
+      <div id="tinvOtherBox" class="hidden"><label for="tinvOther">Specify other</label><input type="text" id="tinvOther" name="tinvOther"></div>
+      <div class="grid">
+        <div><label for="tteam">Team</label>
+          <select id="tteam" name="tteam"><option value="">Select…</option><option value="home">Home team</option><option value="away">Visiting team</option><option value="both">Both teams</option></select></div>
+        <div><label for="tdetails">Names / details (optional)</label><input type="text" id="tdetails" name="tdetails" placeholder="e.g. jersey numbers or staff names"></div>
+      </div>
+    </div>
+
+    <div id="safetyBox" class="hidden">
+      <label for="safety">Safety reason (short subject)</label>
+      <input type="text" id="safety" name="safety" maxlength="100" placeholder="e.g. Lightning, unsafe field, crowd disturbance">
     </div>
   </section>
 
@@ -554,9 +587,22 @@
       ?'In '+h+'-minute halves, the red-carded player may be replaced after '+RED[h]+' minutes of playing time.'
       :'Choose the length of each half to see when the replacement may take the field.';
   }
+  // Match blown off / Other: the report can be about a player, the team or coaching staff, or a safety reason
+  function involveUI(){
+    var t=rtype.value, special=(t===T_MB||t==='Other');
+    el('involveBox').classList.toggle('hidden',!special);
+    var m=special?(el('involve').value||'player'):'player';
+    el('playerBox').classList.toggle('hidden',m!=='player');
+    el('teamBox').classList.toggle('hidden',m!=='team');
+    el('safetyBox').classList.toggle('hidden',m!=='safety');
+    el('secTitle').textContent='3. '+(m==='team'?'Team / Coaching staff':m==='safety'?'Safety reason':'Player');
+    el('tinvOtherBox').classList.toggle('hidden',!el('tinvOtherChk').checked);
+  }
+  el('involve').addEventListener('change',involveUI);
+  el('teamBox').addEventListener('change',involveUI);
   function rtypeUI(){
     el('rtypeOther').classList.toggle('hidden',rtype.value!=='Other');
-    redUI();
+    redUI();involveUI();
   }
   comp.addEventListener('change',compUI);
   rtype.addEventListener('change',rtypeUI);
@@ -614,9 +660,28 @@
     return 'Red card return rule (Law 9.30 amendment): '+d.halfLen+'-minute halves, replacement may take the field after '+RED[d.halfLen]+' minutes of playing time';
   }
 
+  // What the report is about: a player (default), the team / coaching staff, or a safety reason
+  function modeOf(d){
+    var t=normType(d.rtype);
+    return (t===T_MB||t==='Other')&&(d.involve==='team'||d.involve==='safety')?d.involve:'player';
+  }
+  function teamName(d,v){var home=d.home||'Home team', away=d.away||'Visiting team';return v==='home'?home:v==='away'?away:v==='both'?'Both teams':''}
+  function tinvList(d){return (d.tinv||[]).map(function(x){return x==='Other'&&d.tinvOther?'Other: '+d.tinvOther:x})}
+  function whoLabel(d){
+    var m=modeOf(d);
+    if(m==='safety') return 'Safety: '+(d.safety||'');
+    if(m==='team') return 'Team / Coaching staff'+(tinvList(d).length?' ('+tinvList(d).join(', ')+')':'');
+    return (d.pname||'')+(d.pnum?' #'+d.pnum:'');
+  }
+  function whoLines(d){
+    var m=modeOf(d);
+    if(m==='safety') return ['SAFETY REASON','Subject: '+(d.safety||'')];
+    if(m==='team') return ['TEAM / COACHING STAFF','Involved: '+(tinvList(d).join(', ')||'Not stated'),'Team: '+teamName(d,d.tteam),'Names / details: '+(d.tdetails||'')];
+    return ['PLAYER','Player\'s full name: '+(d.pname||''),'Team: '+teamName(d,d.pteam),'Playing position: '+(d.ppos||''),'Playing number: '+(d.pnum||'')];
+  }
+
   function text(d){
     var home=d.home||'Home', away=d.away||'Visiting';
-    var who=d.pteam==='home'?home:d.pteam==='away'?away:'';
     var L=['REFEREE/ASSISTANT REFEREE REPORT ON TEMPORARY SUSPENSION OR SEND OFF OR MATCH BLOWN OFF','',
       'Type of report: '+rtypeLabel(d)];
     var rl=redLine(d); if(rl) L.push(rl);
@@ -624,13 +689,9 @@
       'Venue: '+(d.venue||''),
       'Date of match: '+(d.date||''),'',
       'Home team: '+home,'Visiting team: '+away,
-      'Score at time of incident: '+home+' '+(d.hs||'0')+' - '+(d.as||'0')+' '+away,'',
-      'PLAYER',
-      'Player\'s full name: '+(d.pname||''),
-      'Team: '+who,
-      'Playing position: '+(d.ppos||''),
-      'Playing number: '+(d.pnum||''),'',
-      'LAW INFRINGEMENT',
+      'Score at time of incident: '+home+' '+(d.hs||'0')+' - '+(d.as||'0')+' '+away,'');
+    whoLines(d).forEach(function(x){L.push(x)});
+    L.push('','LAW INFRINGEMENT',
       selectedLaws(d).join('; ')||'None selected');
     if(hasLaw(d,VALUES_LBL)&&d.val) L.push('Values breached: '+d.val.join(', '));
     L.push('',
@@ -763,7 +824,7 @@
       if(c&&d.comp!==c) return false;
       if(t&&typeKey(d)!==t) return false;
       if(q){
-        var hay=[d.pname,d.pnum,d.ppos,d.home,d.away,d.ref,d.ar1,d.ar2,d.venue,d.compName].join(' ').toLowerCase();
+        var hay=[d.pname,d.pnum,d.ppos,d.safety,d.tdetails,d.home,d.away,d.ref,d.ar1,d.ar2,d.venue,d.compName].join(' ').toLowerCase();
         if(hay.indexOf(q)<0) return false;
       }
       return true;
@@ -822,7 +883,7 @@
         var laws=cleanLaws(r.laws).map(function(l){return lawKey(l.law).split(' – ')[0]}).filter(function(v,i,a){return a.indexOf(v)===i}).join(', ');
         return '<tr><td>'+esc(dateOf(r))+'</td><td>'+esc(compLabel(d))+'</td>'+
           '<td>'+esc((d.home||'Home')+' '+(d.hs||0)+' - '+(d.as||0)+' '+(d.away||'Visiting'))+'</td>'+
-          '<td>'+esc((d.pname||'')+(d.pnum?' #'+d.pnum:''))+'</td>'+
+          '<td>'+esc(whoLabel(d))+'</td>'+
           '<td>'+esc(rtypeLabel(d))+'</td><td>'+esc(laws)+'</td><td>'+esc(d.ref||'')+'</td>'+
           '<td><button type="button" class="secondary" data-open="'+esc(r.id)+'">Open</button><button type="button" class="danger" data-del="'+esc(r.id)+'">Delete</button></td></tr>';
       }).join('');
@@ -857,11 +918,11 @@
     return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
   }
   el('exportCsv').onclick=function(){
-    var rows=[['Date','Competition','Venue','Type of report','Home team','Home score','Visiting team','Visiting score','Period','Elapsed minutes','Player','Playing position','Playing number','Player team','Laws referenced','Individual caution','General caution','Referee','Referee contact','Referee email','Assistant referee 1','Assistant referee 2','Description of offence']];
+    var rows=[['Date','Competition','Venue','Type of report','Home team','Home score','Visiting team','Visiting score','Period','Elapsed minutes','Involves','Playing position','Playing number','Player team','Laws referenced','Individual caution','General caution','Referee','Referee contact','Referee email','Assistant referee 1','Assistant referee 2','Description of offence']];
     filtered().forEach(function(r){
       var d=r.form||{};
-      rows.push([dateOf(r),compLabel(d),d.venue,rtypeLabel(d),d.home,d.hs,d.away,d.as,d.half,d.mins,d.pname,d.ppos,d.pnum,
-        d.pteam==='home'?d.home:d.pteam==='away'?d.away:'',
+      rows.push([dateOf(r),compLabel(d),d.venue,rtypeLabel(d),d.home,d.hs,d.away,d.as,d.half,d.mins,whoLabel(d),modeOf(d)==='player'?d.ppos:'',modeOf(d)==='player'?d.pnum:'',
+        modeOf(d)==='player'?teamName(d,d.pteam):(modeOf(d)==='team'?teamName(d,d.tteam):''),
         cleanLaws(r.laws).map(function(l){return l.law}).join('; '),
         (d.pw||[])[0]||'',(d.tw||[])[0]||'',d.ref,d.refTel,d.refEmail,d.ar1,d.ar2,d.desc]);
     });
@@ -903,6 +964,7 @@
     'Laws: '+LAWS_TXT,
     'Local WP rule - Law 9.30 amendment (red card return rule): a red-carded player may be replaced after a set amount of playing time per half: 40-minute halves after 20 minutes; 35 after 15; 30 after 12; 25 after 10. Mention it only for a send off (red card) report where the half length is given.',
     'If the conduct (for example abuse, dissent or disrespect) is not covered by a specific law, reference the spirit of the game and World Rugby\'s core values (Integrity, Passion, Solidarity, Discipline, Respect).',
+    'A match blown off or other report may be about a player, the team / coaching staff, or a safety reason (report_is_about). Write the description to suit that. For a safety reason, state the hazard, when it was noticed, what the referee did and who was told. Do not blame an individual unless the referee\'s description does.',
     'Do not decide guilt and do not recommend a sanction. Describe what the referee saw and heard and the action the referee took.',
     'suggestions: 4 to 8 short, practical tips to strengthen the report for a DC hearing (for example exact words used, referee position and distance, whether and when a caution was given, outcome and who was informed, witnesses, whether it was seen live or on video, injury to the other player).',
     'missing_info: questions the DC is likely to ask that the description does not answer.',
@@ -943,7 +1005,10 @@
       date:d.date,competition:compLabel(d),venue:d.venue,
       home_team:home,visiting_team:away,score_at_time:home+' '+(d.hs||0)+' - '+(d.as||0)+' '+away,
       period:d.half,elapsed_minutes:d.mins,
-      player:d.pname,playing_position:d.ppos,playing_number:d.pnum,player_team:d.pteam==='home'?home:d.pteam==='away'?away:'',
+      report_is_about:modeOf(d)==='team'?'team / coaching staff':modeOf(d)==='safety'?'a safety reason':'a player',
+      player:modeOf(d)==='player'?d.pname:'',playing_position:modeOf(d)==='player'?d.ppos:'',playing_number:modeOf(d)==='player'?d.pnum:'',player_team:modeOf(d)==='player'?teamName(d,d.pteam):'',
+      team_or_staff_involved:modeOf(d)==='team'?tinvList(d):[],team_involved:modeOf(d)==='team'?teamName(d,d.tteam):'',names_or_details:modeOf(d)==='team'?d.tdetails:'',
+      safety_reason:modeOf(d)==='safety'?d.safety:'',
       laws_ticked_by_referee:selectedLaws(d),
       values_breached:d.val||[],
       individual_caution_issued:(d.pw||[])[0]||'not stated',general_caution_issued:(d.tw||[])[0]||'not stated',
