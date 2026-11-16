@@ -128,8 +128,55 @@
   .dsec{margin-top:16px}
 
   @media(max-width:520px){.scoreboard{grid-template-columns:1fr}.vs{text-align:center;padding:0}.lawrow{grid-template-columns:1fr}.addlaw{flex-direction:column}.dgrid{grid-template-columns:1fr}}
-  @media print{.actions,.status,.nav{display:none}body{background:#fff}section{break-inside:avoid}
-    .noprint{display:none!important}body.print-preview #f{display:none!important}#pvDesc{min-height:0;border:0;padding:0}}
+  /* ===== Printed / PDF report: follows the WP Referees incident report template ===== */
+  #printDoc{display:none}
+  @page{size:A4;margin:10mm}
+  @media print{
+    html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{background:#fff}
+    body.pdf-mode header,body.pdf-mode main{display:none!important}
+    body.pdf-mode #printDoc{display:block}
+  }
+  .pd{font-family:Calibri,Carlito,'Segoe UI',Arial,sans-serif;font-size:10.5pt;color:#000;line-height:1.25}
+  .pd .top img{height:21mm;width:auto;display:block}
+  .pd .ttl{font-weight:700;font-style:italic;font-size:11.5pt;margin:1mm 0 4mm 10mm;max-width:165mm}
+  .pd .typ{display:flex;align-items:center;gap:3mm;margin-bottom:2mm}
+  .pd .typ .lab{font-weight:700;font-size:10.5pt}
+  .pd .typ .lab i{font-weight:700}
+  .pd .tb{border:1px solid #999;padding:2.2mm 3mm;text-align:center;font-size:9.5pt;min-width:27mm;line-height:1.35}
+  .pd .tb.sd{border:1.6px solid #d91f28}
+  .pd .tb.mb{border:1.6px solid #f29a2e}
+  .pd .tb.ot{border:1.6px solid #005597}
+  .pd .typ.pick .tb:not(.sel){opacity:.45}
+  .pd .tb.sel{font-weight:700;outline:2.6px solid #000;outline-offset:1.5px;background:#fbf072}
+  .pd .note{font-size:9pt;font-style:italic;margin:0 0 2mm}
+  .pd table{border-collapse:collapse;width:100%;table-layout:fixed;break-inside:avoid}
+  .pd td,.pd th{border:1px solid #000;padding:1.3mm 2mm;vertical-align:middle;text-align:left;overflow-wrap:anywhere}
+  .pd .lb{font-weight:700}
+  .pd .grey{background:#e6e6e6;text-align:center;font-style:italic;font-weight:700}
+  .pd .laws{font-weight:700;font-size:12.5pt;line-height:2}
+  .pd .laws span{border:1.6px solid transparent;border-radius:999px;padding:0 1.8mm;margin:0 .3mm;display:inline-block;line-height:1.35}
+  .pd .circ{border:1.6px solid #000!important;background:#fbf072}
+  .pd .oth{font-size:10pt;font-weight:700;margin-top:1.5mm;line-height:1.4}
+  .pd .oth span{display:inline;border:0;padding:0;background:none}
+  .pd .row2{display:flex;align-items:center;gap:4mm;margin:3mm 0}
+  .pd .row2 .lab{font-weight:700;min-width:58mm}
+  .pd .bx{border:1px solid #000;min-width:23mm;padding:3.2mm 2mm;text-align:center;font-size:10pt}
+  .pd .bx.sel{border-width:2.6px;background:#fbf072;font-weight:700}
+  .pd .bx.num{min-width:23mm;font-weight:700;font-size:12pt}
+  .pd .rule{height:1.6mm;background:#000;margin:4mm 0}
+  .pd .yn{font-weight:700;font-size:12pt}
+  .pd .yn span{border:1.6px solid transparent;border-radius:999px;padding:0 2.4mm;margin-left:2mm;display:inline-block}
+  .pd .dh{font-weight:700;font-size:11pt;margin:4mm 0 1mm}
+  .pd .dh small{font-size:8.5pt}
+  .pd .sg{max-height:10mm;max-width:100%;display:block}
+  .pd .dd{text-align:center;font-weight:700;margin:3mm 0 1mm}
+  .pd .lined{white-space:pre-wrap;line-height:7mm;min-height:42mm;padding:0 1mm;font-size:10.5pt;
+    background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 6.4mm,#6f9fd4 6.4mm,#6f9fd4 7mm)}
+  .pd .lr{margin-top:4mm;font-size:10pt;break-inside:avoid}
+  .pd .lr ol{margin:1mm 0 0;padding-left:6mm}
+  .pd .nt{border:1.6px solid #f29a2e;padding:2.5mm;margin-top:6mm;font-weight:700;break-inside:avoid}
+  .pd .pv2{font-family:Arial,Helvetica,sans-serif;font-style:italic;font-weight:700;font-size:8.5pt;margin-top:4mm}
 </style>
 </head>
 <body>
@@ -151,6 +198,9 @@
 
 <main>
 <div id="viewForm">
+<div class="actions noprint" style="justify-content:flex-end;margin-bottom:12px">
+  <button type="button" class="danger" id="clearTop">Clear form</button>
+</div>
 <form id="f" autocomplete="off">
 
   <section>
@@ -332,7 +382,7 @@
 
   <div class="actions">
     <button type="button" class="primary" id="save">Save report</button>
-    <button type="button" class="secondary" id="print">Print / PDF</button>
+    <button type="button" class="secondary" id="print">Download PDF</button>
     <button type="button" class="danger" id="clear">Clear form</button>
   </div>
   <div class="status" id="status"></div>
@@ -393,7 +443,8 @@
     <button type="button" class="secondary" id="rerunBtn">Run again</button>
     <button type="button" class="secondary" id="origBtn">Restore my original wording</button>
     <button type="button" class="primary" id="dlBtn">Save final report</button>
-    <button type="button" class="secondary" id="prBtn">Print / PDF</button>
+    <button type="button" class="secondary" id="prBtn">Download PDF</button>
+    <button type="button" class="danger" id="clearPv">Clear form</button>
   </div>
   <div class="status" id="pvStatus"></div>
 </div>
@@ -430,6 +481,7 @@
       <button type="button" class="secondary" id="exportCsv">Export to Excel (CSV)</button>
       <button type="button" class="secondary" id="exportJson">Download backup</button>
       <button type="button" class="secondary" id="importBtn">Restore backup</button>
+      <button type="button" class="danger" id="clearAll">Clear all saved reports</button>
       <input type="file" id="importFile" accept=".json,application/json" class="hidden">
     </div>
     <div class="status" id="dashStatus"></div>
@@ -437,6 +489,7 @@
   </section>
 </div>
 </main>
+<div id="printDoc" class="pd"></div>
 
 <script>
 (function(){
